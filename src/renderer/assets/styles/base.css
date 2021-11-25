@@ -1,0 +1,24 @@
+
+:root {
+  --toolbar-height: 30px;
+  --footer-height: 30px;
+
+  --color-bg: hsl(240, 3%, 13%);
+  --color-text: hsl(0, 0%, 67%);
+  --color-gray-100: hsl(240, 3%, 16%);
+  --color-gray-200: hsl(240, 3%, 20%);
+  --color-gray-300: hsl(240, 3%, 30%);
+  --color-gray-500: hsl(240, 3%, 50%);
+  --color-gray-700: hsl(240, 3%, 70%);
+  --color-error: hsl(0, 50%, 50%);
+  --color-table-row-even: var(--color-gray-100);
+}
+
+body {
+  margin: 0;
+  font-size: 12px;
+  height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
