@@ -55,11 +55,8 @@ export default {
     },
     onDragLeave (e) {
       e.preventDefault()
-      // this.isDragAreaShow = false
-      console.log('drag leave')
     },
     onFooterAction (event) {
-      console.log(event)
       if (event === 'settings') {
         this.component = 'AppSettings'
       } else {
@@ -95,7 +92,6 @@ export default {
     top: 0;
     width: 100%;
     height: var(--toolbar-height);
-    // user-select: none;
     -webkit-app-region: drag;
     z-index: 1010;
     transition: all 0.5s;

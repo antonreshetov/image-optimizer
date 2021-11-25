@@ -69,11 +69,5 @@ export default {
       fill: var(--color-gray-700);
     }
   }
-
-  .actions {
-    &-item {
-      // background-color: red;
-    }
-  }
 }
 </style>

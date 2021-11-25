@@ -2,14 +2,12 @@
   <div class="settings">
     <h2>Settings</h2>
     <div class="settings__body">
-      <!-- <h3>JPEG (mozjpeg)</h3> -->
       <AppSettingsRow title="JPEG Quality (mozjpeg)">
         <AppInput
           v-model="jpegQuality"
           type="number"
         />
       </AppSettingsRow>
-      <!-- <h3>PNG (pngquant)</h3> -->
       <AppSettingsRow title="PNG Quality Range (pngquant)">
         <div class="flex">
           <AppInput
@@ -25,7 +23,6 @@
           />
         </div>
       </AppSettingsRow>
-      <!-- <h3>Genereal</h3> -->
       <AppSettingsRow title="Add '.min' suffix to optimized files">
         <AppToggle v-model="addMinSuffix" />
       </AppSettingsRow>
@@ -84,11 +81,8 @@ export default {
       set (v) {
         let value = v <= 0 ? 0 : v
         value = value > 99 ? 99 : v
-
-        // if (this.localPngQualityMin >= this.localPngQualityMax) {
-        //   this.localPngQualityMax = this.localPngQualityMin + 1
-        // }
         this.localPngQualityMin = Number(value)
+
         if (this.validatePngQualityRange()) {
           store.set('pngquant.qualityMin', this.localPngQualityMin)
         }
@@ -101,10 +95,6 @@ export default {
       set (v) {
         let value = v <= 0 ? 0 : v
         value = value > 100 ? 100 : v
-
-        // if (this.localPngQualityMax <= this.localPngQualityMin && this.localPngQualityMax) {
-        //   this.localPngQualityMin = this.localPngQualityMax - 1
-        // }
         this.localPngQualityMax = Number(value)
 
         if (this.validatePngQualityRange()) {

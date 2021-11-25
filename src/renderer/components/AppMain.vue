@@ -38,11 +38,7 @@ export default {
     },
     onDragLeave (e) {
       e.preventDefault()
-      // this.isDragAreaShow = false
       console.log('drag leave')
-    },
-    onFooterAction (event) {
-      console.log(event)
     }
   }
 }
