@@ -19,6 +19,7 @@ const config = {
     icon: 'build/icons/icon.icns'
   },
   win: {
+    icon: 'build/icons/icon.ico',
     target: 'nsis'
   },
   linux: {

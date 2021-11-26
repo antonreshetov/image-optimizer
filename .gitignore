@@ -1,6 +1,7 @@
 node_modules
 dist
-build
+build/*
+!build/icons
 
 .vscode
 .idea
