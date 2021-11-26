@@ -16,7 +16,11 @@ const config = {
     shortcutName: 'Image Optimizer'
   },
   mac: {
-    icon: 'build/icons/icon.icns'
+    icon: 'build/icons/icon.icns',
+    target: [
+      { target: 'dmg', arch: 'arm64' },
+      { target: 'dmg', arch: 'x64' }
+    ]
   },
   win: {
     icon: 'build/icons/icon.ico',
