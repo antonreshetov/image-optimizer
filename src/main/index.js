@@ -38,13 +38,17 @@ function createWindow () {
   return { mainWindow }
 }
 
-app.whenReady().then(() => {
+function init () {
   createWindow()
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu(mainWindow)))
+}
+
+app.whenReady().then(() => {
+  init()
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
+      init()
     } else {
       mainWindow.show()
     }
