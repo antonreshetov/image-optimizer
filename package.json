@@ -11,7 +11,7 @@
     "release": "sh scripts/release.sh",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
   },
-  "repository": "https://github.com/antonreshetov/electron-vue-vite-boilerplate",
+  "repository": "https://github.com/antonreshetov/image-optimizer",
   "author": {
     "name": "Anton Reshetov",
     "url": "https://github.com/antonreshetov"
