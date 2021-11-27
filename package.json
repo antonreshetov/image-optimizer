@@ -1,6 +1,6 @@
 {
   "name": "image-optimization",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Electron & Vue 3 application",
   "main": "src/main/index.js",
   "scripts": {
