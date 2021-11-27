@@ -30,7 +30,9 @@ function createWindow () {
   }
 
   mainWindow.on('close', e => {
-    store.app.set('bounds', mainWindow.getBounds())
+    if (typeof mainWindow.getBounds() === 'object') {
+      store.app.set('bounds', mainWindow.getBounds())
+    }
   })
 
   return { mainWindow }

@@ -6,7 +6,7 @@ const app = new Store({
   schema: {
     bounds: {
       type: 'object',
-      default: null
+      default: {}
     },
     addToSubfolder: {
       type: 'boolean',
