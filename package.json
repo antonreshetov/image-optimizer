@@ -8,6 +8,7 @@
     "build": "node scripts/build.js",
     "lint": "npm run prettier && eslint --ext .js,.vue . --fix src",
     "prettier": "prettier --write src/**/*.{vue,js}",
+    "release": "sh scripts/release.sh",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
   },
   "repository": "https://github.com/antonreshetov/electron-vue-vite-boilerplate",
