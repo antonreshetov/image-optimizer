@@ -99,7 +99,7 @@ module.exports = context => {
               V8: ${process.versions.v8}
               OS: ${os.type()} ${os.arch()} ${os.release()}
 
-              ©2019-${year} Anton Reshetov <reshetov-art@gmail.com>
+              ©2021-${year} Anton Reshetov <reshetov-art@gmail.com>
             `
           })
         }
