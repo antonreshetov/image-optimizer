@@ -3,6 +3,7 @@ const { ensureDirSync, readFile, writeFile, readdir } = require('fs-extra')
 const { execFile } = require('child_process')
 const mozjpeg = require('mozjpeg')
 const pngquant = require('pngquant-bin')
+const gifsicle = require('gifsicle')
 const svg = require('svgo')
 const junk = require('junk')
 const mime = require('mime-types')
@@ -18,6 +19,7 @@ const MIME_TYPE_ENUM = {
   jpg: 'image/jpeg',
   png: 'image/png',
   svg: 'image/svg+xml',
+  gif: 'image/gif',
   folder: ''
 }
 
@@ -149,6 +151,23 @@ class ImageOptimizer {
               resolve()
             }
           )
+          break
+        }
+
+        case MIME_TYPE_ENUM.gif: {
+          execFile(gifsicle, ['-o', output, file.path], err => {
+            if (err) {
+              console.log(err)
+              reject(err)
+            }
+
+            const compressedSize = getFileSize(output)
+            context.webContents.send(
+              'file-complete',
+              this.#formatOutputData(file, originalSize, compressedSize)
+            )
+            resolve()
+          })
           break
         }
 
