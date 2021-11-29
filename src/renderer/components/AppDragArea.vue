@@ -8,7 +8,7 @@
     <div class="hero">
       <AppLogo />
       <h2>Drag files or folder here</h2>
-      <p>support only JPG, PNG and SVG</p>
+      <p>support only JPG, PNG, GIF and SVG</p>
     </div>
   </div>
 </template>
