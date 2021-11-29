@@ -22,6 +22,7 @@ A free and open source tool for optimizing images and vector graphics.
 ## Core libs
  - [mozjpeg](https://github.com/mozilla/mozjpeg)
  - [pngquant](https://pngquant.org)
+ - [gifsicle](https://www.lcdf.org/gifsicle/)
  - [SVGO](https://github.com/svg/svgo)
 
 ## Download and Installation on macOS
