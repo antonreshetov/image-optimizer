@@ -2,6 +2,7 @@ const Store = require('electron-store')
 
 const app = new Store({
   name: 'app',
+  watch: true,
 
   schema: {
     bounds: {
@@ -19,6 +20,10 @@ const app = new Store({
     clearResultList: {
       type: 'boolean',
       default: false
+    },
+    animationOnCompletion: {
+      type: 'boolean',
+      default: true
     },
     concurrency: {
       type: 'number',

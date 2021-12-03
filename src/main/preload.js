@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('electron', {
   },
   store: {
     set: (key, value) => store.app.set(key, value),
-    get: key => store.app.get(key)
+    get: key => store.app.get(key),
+    on: (key, cb) => store.app.onDidChange(key, cb)
   }
 })
