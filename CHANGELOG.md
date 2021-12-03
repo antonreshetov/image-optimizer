@@ -1,3 +1,13 @@
+## [1.1.1](https://github.com/antonreshetov/image-optimizer/compare/v1.1.0...v1.1.1) (2021-12-03)
+
+
+### Features
+
+* add animation on completion ([#5](https://github.com/antonreshetov/image-optimizer/issues/5)) ([a63fae3](https://github.com/antonreshetov/image-optimizer/commit/a63fae31846baf3df8bdf94bdbd02c5dc37b57f5))
+* add check for update ([#6](https://github.com/antonreshetov/image-optimizer/issues/6)) ([ccf3b13](https://github.com/antonreshetov/image-optimizer/commit/ccf3b13ff09dae5e3bb7cdcfc69b7b1988947156))
+
+
+
 # [1.1.0](https://github.com/antonreshetov/image-optimizer/compare/v1.0.2...v1.1.0) (2021-11-29)
 
 
