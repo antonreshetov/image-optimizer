@@ -2,6 +2,23 @@
   <div class="footer">
     <div class="actions">
       <div
+        v-if="updateAvailable"
+        class="actions-item update"
+        @click="onUpdate"
+      >
+        <span>Update available</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+        >
+          <path
+            d="M12.71,8.29a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-3,3a1,1,0,0,0,1.42,1.42L11,11.41V15a1,1,0,0,0,2,0V11.41l1.29,1.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42ZM12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+          />
+        </svg>
+      </div>
+      <div
         v-if="showSettingsButton"
         class="actions-item settings"
         @click="$emit('action', 'settings')"
@@ -38,6 +55,8 @@
 </template>
 
 <script>
+import { ipc } from '@/electron'
+
 export default {
   name: 'AppFooter',
 
@@ -46,12 +65,29 @@ export default {
   emits: ['action'],
 
   data () {
-    return {}
+    return {
+      updateAvailable: false
+    }
   },
 
   computed: {
     showSettingsButton () {
       return this.$root.component === 'AppMain'
+    }
+  },
+
+  created () {
+    ipc.on('update-available', () => {
+      this.updateAvailable = true
+    })
+  },
+
+  methods: {
+    onUpdate () {
+      ipc.send(
+        'open-url',
+        'https://github.com/antonreshetov/image-optimizer/releases'
+      )
     }
   }
 }
@@ -63,6 +99,27 @@ export default {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  .actions {
+    display: flex;
+    gap: 6px;
+    &-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      span {
+        font-size: 10px;
+      }
+    }
+  }
+  .update {
+    cursor: pointer;
+    svg {
+      fill: var(--color-green);
+      &:hover {
+        fill: var(--color-green);
+      }
+    }
+  }
   svg {
     fill: var(--color-gray-500);
     &:hover {

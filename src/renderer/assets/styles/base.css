@@ -11,6 +11,7 @@
   --color-gray-500: hsl(240, 3%, 50%);
   --color-gray-700: hsl(240, 3%, 70%);
   --color-error: hsl(0, 50%, 50%);
+  --color-green: hsl(120, 61%, 50%);
   --color-table-row-even: var(--color-gray-100);
 }
 
