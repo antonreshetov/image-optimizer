@@ -32,6 +32,9 @@
       <AppSettingsRow title="Clear result list when new image added">
         <AppToggle v-model="clearResultList" />
       </AppSettingsRow>
+      <AppSettingsRow title="Animation on completion">
+        <AppToggle v-model="animationOnCompletion" />
+      </AppSettingsRow>
     </div>
   </div>
 </template>
@@ -58,7 +61,8 @@ export default {
       localPngQualityMax: Number(store.get('pngquant.qualityMax')),
       localAddMinSuffix: store.get('addMinSuffix'),
       localAddToSubfolder: store.get('addToSubfolder'),
-      localClearResultList: store.get('clearResultList')
+      localClearResultList: store.get('clearResultList'),
+      localAnimationOnCompletion: store.get('animationOnCompletion')
     }
   },
 
@@ -127,6 +131,15 @@ export default {
       set (v) {
         this.localClearResultList = v
         store.set('clearResultList', v)
+      }
+    },
+    animationOnCompletion: {
+      get () {
+        return this.localAnimationOnCompletion
+      },
+      set (v) {
+        this.localAnimationOnCompletion = v
+        store.set('animationOnCompletion', v)
       }
     }
   },

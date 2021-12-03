@@ -1,5 +1,5 @@
 <template>
-  <div class="app-title-bar" />
+  <div class="app-tool-bar" />
   <main>
     <keep-alive>
       <component :is="component" />
@@ -8,6 +8,10 @@
   <footer>
     <AppFooter @action="onFooterAction" />
   </footer>
+  <canvas
+    ref="canvas"
+    class="confetti"
+  />
 </template>
 
 <script>
@@ -16,7 +20,8 @@ import AppFileList from '@/components/AppFileList.vue'
 import AppFooter from '@/components/AppFooter.vue'
 import AppMain from '@/components/AppMain.vue'
 import AppSettings from '@/components/AppSettings.vue'
-import { ipc } from '@/electron'
+import { ipc, store } from '@/electron'
+import confetti from 'canvas-confetti'
 
 export default {
   name: 'App',
@@ -37,7 +42,9 @@ export default {
 
   data () {
     return {
-      component: 'AppMain'
+      component: 'AppMain',
+      confetti: null,
+      animationOnCompletion: store.get('animationOnCompletion')
     }
   },
 
@@ -46,6 +53,18 @@ export default {
     ipc.on('menu:preferences', () => {
       this.component = 'AppSettings'
     })
+    ipc.on('optimization-complete', () => {
+      if (this.animationOnCompletion) {
+        this.runConfetti()
+      }
+    })
+    store.on('animationOnCompletion', v => {
+      this.animationOnCompletion = v
+    })
+  },
+
+  mounted () {
+    this.confetti = confetti.create(this.$refs.canvas)
   },
 
   methods: {
@@ -62,6 +81,12 @@ export default {
       } else {
         this.component = 'AppMain'
       }
+    },
+    runConfetti () {
+      this.confetti({
+        particleCount: 200,
+        origin: { y: 1 }
+      })
     }
   }
 }
@@ -84,10 +109,18 @@ export default {
     grid-area: footer;
     padding: 0 12px;
   }
+  .confetti {
+    position: absolute;
+    height: 100vh;
+    width: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
 }
 
 .app {
-  &-title-bar {
+  &-tool-bar {
     position: absolute;
     top: 0;
     width: 100%;
