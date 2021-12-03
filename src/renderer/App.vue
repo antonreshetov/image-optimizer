@@ -44,7 +44,8 @@ export default {
     return {
       component: 'AppMain',
       confetti: null,
-      animationOnCompletion: store.get('animationOnCompletion')
+      animationOnCompletion: store.get('animationOnCompletion'),
+      updateAvailable: false
     }
   },
 

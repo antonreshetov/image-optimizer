@@ -1,8 +1,9 @@
-const { app, BrowserWindow, ipcMain, Menu } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron')
 const path = require('path')
 const store = require('./store')
 const { ImageOptimizer } = require('./image-compressor')
 const menu = require('./menu')
+const { checkForUpdate } = require('./update-check')
 
 let mainWindow
 
@@ -40,6 +41,7 @@ function createWindow () {
 
 function init () {
   createWindow()
+  checkForUpdate(mainWindow)
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu(mainWindow)))
 }
 
@@ -49,9 +51,8 @@ app.whenReady().then(() => {
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) {
       init()
-    } else {
-      mainWindow.show()
     }
+    checkForUpdate(mainWindow)
   })
 })
 
@@ -62,4 +63,8 @@ app.on('window-all-closed', function () {
 ipcMain.on('drop', (event, files = []) => {
   const optimizer = new ImageOptimizer(files, mainWindow)
   optimizer.start()
+})
+
+ipcMain.on('open-url', (event, url) => {
+  shell.openExternal(url)
 })
