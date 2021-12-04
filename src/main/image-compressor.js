@@ -70,7 +70,7 @@ class ImageOptimizer {
           ensureDirSync(`${dir}/${MIN_FOLDER}`)
         }
 
-        this.#queue.push(() => this.#processFile(file, output, this.#context))
+        this.#queue.push(() => this.#processFile(file, output))
       }
 
       if (isFolder(file.path)) {
@@ -115,10 +115,7 @@ class ImageOptimizer {
               }
 
               const compressedSize = getFileSize(output)
-              context.webContents.send(
-                'file-complete',
-                this.#formatOutputData(file, originalSize, compressedSize)
-              )
+              this.#sendToRenderer(file, originalSize, compressedSize)
               resolve()
             }
           )
@@ -144,10 +141,7 @@ class ImageOptimizer {
               }
 
               const compressedSize = getFileSize(output)
-              context.webContents.send(
-                'file-complete',
-                this.#formatOutputData(file, originalSize, compressedSize)
-              )
+              this.#sendToRenderer(file, originalSize, compressedSize)
               resolve()
             }
           )
@@ -162,10 +156,7 @@ class ImageOptimizer {
             }
 
             const compressedSize = getFileSize(output)
-            context.webContents.send(
-              'file-complete',
-              this.#formatOutputData(file, originalSize, compressedSize)
-            )
+            this.#sendToRenderer(file, originalSize, compressedSize)
             resolve()
           })
           break
@@ -183,10 +174,7 @@ class ImageOptimizer {
               if (err) console.log(err)
 
               const compressedSize = getFileSize(output)
-              context.webContents.send(
-                'file-complete',
-                this.#formatOutputData(file, originalSize, compressedSize)
-              )
+              this.#sendToRenderer(file, originalSize, compressedSize)
               resolve()
             })
           })
@@ -206,6 +194,13 @@ class ImageOptimizer {
         compressedSize.bytes * (100 / originalSize.bytes) - 100
       ).toFixed(2)
     }
+  }
+
+  #sendToRenderer (file, originalSize, compressedSize) {
+    this.#context.webContents.send(
+      'file-complete',
+      this.#formatOutputData(file, originalSize, compressedSize)
+    )
   }
 }
 
