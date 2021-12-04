@@ -1,4 +1,6 @@
 const fs = require('fs')
+const path = require('path')
+const mime = require('mime-types')
 
 function isFile (path) {
   const stat = fs.lstatSync(path)
@@ -18,6 +20,17 @@ function getFileSize (path) {
   }
 }
 
+function getFilesOrDirs (paths) {
+  return paths.map(p => {
+    const { name, ext } = path.parse(p)
+    return {
+      name: name + ext,
+      path: p,
+      type: isFolder(p) ? '' : mime.lookup(p)
+    }
+  })
+}
+
 function formatBytes (bytes, decimals = 2) {
   if (bytes === 0) return '0 Bytes'
 
@@ -33,5 +46,6 @@ function formatBytes (bytes, decimals = 2) {
 module.exports = {
   isFile,
   isFolder,
-  getFileSize
+  getFileSize,
+  readFileOrDir: getFilesOrDirs
 }
