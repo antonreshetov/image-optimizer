@@ -37,6 +37,10 @@ export default {
     return {}
   },
 
+  created () {
+    ipc.on('drop-from-dialog', () => this.$emit('hide', true))
+  },
+
   methods: {
     onDrop (e) {
       e.preventDefault()
