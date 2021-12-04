@@ -1,6 +1,8 @@
 const { app, dialog, BrowserWindow, shell } = require('electron')
 const { version, author } = require('../../package.json')
 const os = require('os')
+const { readFileOrDir } = require('./utils')
+const { ImageOptimizer } = require('./image-compressor')
 
 const isMac = process.platform === 'darwin'
 const year = new Date().getFullYear()
@@ -66,6 +68,27 @@ module.exports = context => {
     submenu: createImageOptimizerMenu(context)
   }
 
+  const file = {
+    label: 'File',
+    submenu: [
+      {
+        label: 'Open Images',
+        async click () {
+          const { filePaths } = await dialog.showOpenDialog({
+            properties: ['openFile', 'openDirectory', 'multiSelections']
+          })
+          if (filePaths.length) {
+            const files = readFileOrDir(filePaths)
+            const optimizer = new ImageOptimizer(files, context)
+            context.webContents.send('drop-from-dialog')
+            optimizer.start()
+          }
+        },
+        accelerator: 'CommandOrControl+O'
+      }
+    ]
+  }
+
   const help = {
     label: 'Help',
     role: 'help',
@@ -107,5 +130,5 @@ module.exports = context => {
     ]
   }
 
-  return [imageOptimizer, help]
+  return [imageOptimizer, file, help]
 }
