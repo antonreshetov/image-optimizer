@@ -1,3 +1,12 @@
+# [1.3.0](https://github.com/antonreshetov/image-optimizer/compare/v1.2.0...v1.3.0) (2021-12-04)
+
+
+### Features
+
+* **main:** open images from dialog menu ([#7](https://github.com/antonreshetov/image-optimizer/issues/7)) ([e591d35](https://github.com/antonreshetov/image-optimizer/commit/e591d3597e2c58ccbd3790c3911ebd5100d2a05d))
+
+
+
 # [1.2.0](https://github.com/antonreshetov/image-optimizer/compare/v1.1.0...v1.2.0) (2021-12-03)
 
 
