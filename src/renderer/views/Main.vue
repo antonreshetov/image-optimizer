@@ -16,15 +16,8 @@ const store = useStore()
 
 const onDragOver = (e: DragEvent) => {
   e.preventDefault()
-  console.log('ass')
   store.showFileList = false
 }
-
-const onDragLeave = () => {
-  // store.showFileList = true
-}
-
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

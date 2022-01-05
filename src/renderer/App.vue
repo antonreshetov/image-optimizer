@@ -49,7 +49,6 @@ ipc.on('menu:preferences', () => {
 })
 
 ipc.on('drop-from-dialog', () => {
-  console.log('as')
   store.showFileList = true
 })
 </script>

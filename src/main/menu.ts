@@ -17,7 +17,9 @@ if (isMac) {
   })
 }
 
-const createSubmenu = (context: BrowserWindow): MenuItemConstructorOptions[] => {
+const createSubmenu = (
+  context: BrowserWindow
+): MenuItemConstructorOptions[] => {
   if (isMac) {
     return [
       {
@@ -61,7 +63,9 @@ const createSubmenu = (context: BrowserWindow): MenuItemConstructorOptions[] => 
   return []
 }
 
-export const createMenu = (context: BrowserWindow): MenuItemConstructorOptions[] => {
+export const createMenu = (
+  context: BrowserWindow
+): MenuItemConstructorOptions[] => {
   const imageOptimizer = {
     label: 'Image Optimizer',
     submenu: createSubmenu(context)
@@ -148,13 +152,6 @@ export const createMenu = (context: BrowserWindow): MenuItemConstructorOptions[]
               ©2021-${year} Anton Reshetov <reshetov.art@gmail.com>
             `
           })
-        }
-      },
-      {
-        label: 'Open Developer Tools',
-        accelerator: 'Alt+CommandOrControl+I',
-        click () {
-          context.webContents.openDevTools({ mode: 'detach' })
         }
       }
     ]

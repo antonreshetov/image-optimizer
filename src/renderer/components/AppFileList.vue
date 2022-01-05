@@ -67,19 +67,15 @@ import type { FileOutput } from '../../main/types'
 import { formatBytes } from '../../main/utils'
 import { useStore } from '@/store'
 
-interface Emits {
-  (e: 'file-list-empty'): void
-}
-
-const emit = defineEmits<Emits>()
-
 const store = useStore()
-const showPreloader = ref(false)
 
 const total = computed(() => {
-  const percentage = Number(Math.abs(
-    store.totalFiles.compressedSize * (100 / store.totalFiles.originalSize) - 100
-  ).toFixed(2))
+  const percentage = Number(
+    Math.abs(
+      store.totalFiles.compressedSize * (100 / store.totalFiles.originalSize) -
+        100
+    ).toFixed(2)
+  )
 
   return {
     originalSize: formatBytes(store.totalFiles.originalSize),
@@ -98,15 +94,7 @@ ipc.on('optimization-start', () => {
   if (electronStore.get('clearResultList')) {
     store.files = []
   }
-  showPreloader.value = true
   store.jobTime = '-'
-})
-
-ipc.on('optimization-complete', () => {
-  showPreloader.value = false
-  if (store.files.length === 0) {
-    emit('file-list-empty')
-  }
 })
 
 ipc.on('job-time', (_, time) => {
@@ -116,7 +104,6 @@ ipc.on('job-time', (_, time) => {
 onUnmounted(() => {
   ipc.removeListeners('file-complete')
   ipc.removeListeners('optimization-start')
-  ipc.removeListeners('optimization-complete')
   ipc.removeListeners('job-time')
 })
 </script>
