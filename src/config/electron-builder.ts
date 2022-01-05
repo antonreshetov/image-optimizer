@@ -2,7 +2,8 @@ import type { Configuration } from 'electron-builder'
 import path from 'path'
 
 export default {
-  appId: 'com.example.app',
+  productName: 'Image Optimizer',
+  appId: 'com.antonreshetov.image-optimizer',
   directories: {
     output: path.resolve(__dirname, '../../../dist')
   },
@@ -10,7 +11,7 @@ export default {
     oneClick: false,
     perMachine: false,
     allowToChangeInstallationDirectory: true,
-    shortcutName: 'Electron App'
+    shortcutName: 'Image Optimizer'
   },
   mac: {
     target: [
