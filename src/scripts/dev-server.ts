@@ -8,7 +8,7 @@ import viteConfig from '../config/vite'
 
 process.env.NODE_ENV = 'development'
 
-let electronProcess: ChildProcess | undefined
+let electronProcess: ChildProcess | null
 let rendererPort: number | undefined = 0
 
 async function startRenderer () {
