@@ -2,29 +2,25 @@
   <div
     class="app-toggle"
     :class="{ 'is-active': modelValue }"
-    @click="$emit('update:modelValue', !modelValue)"
+    @click="emit('update:modelValue', !modelValue)"
   >
     <div class="dot" />
   </div>
 </template>
 
-<script>
-export default {
-  name: 'AppToggle',
-
-  props: {
-    modelValue: {
-      type: Boolean,
-      default: false
-    }
-  },
-
-  emits: ['update:modelValue'],
-
-  data () {
-    return {}
-  }
+<script setup lang="ts">
+interface Props {
+  modelValue: boolean
 }
+
+interface Emits {
+  (e: 'update:modelValue', value: boolean): void
+}
+
+withDefaults(defineProps<Props>(), {
+  modelValue: false
+})
+const emit = defineEmits<Emits>()
 </script>
 
 <style lang="scss" scoped>

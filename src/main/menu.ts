@@ -1,8 +1,9 @@
-const { app, dialog, BrowserWindow, shell } = require('electron')
-const { version, author } = require('../../package.json')
-const os = require('os')
-const { readFileOrDir } = require('./utils')
-const { ImageOptimizer } = require('./image-compressor')
+import type { MenuItemConstructorOptions } from 'electron'
+import { app, dialog, shell, BrowserWindow } from 'electron'
+import { version, author } from '../../package.json'
+import os from 'os'
+import { getFilesOrDirs } from './utils'
+import { ImageOptimizer } from './image-compressor'
 
 const isMac = process.platform === 'darwin'
 const year = new Date().getFullYear()
@@ -16,7 +17,9 @@ if (isMac) {
   })
 }
 
-function createImageOptimizerMenu (context) {
+const createSubmenu = (
+  context: BrowserWindow
+): MenuItemConstructorOptions[] => {
   if (isMac) {
     return [
       {
@@ -38,17 +41,14 @@ function createImageOptimizerMenu (context) {
       },
       {
         label: 'Hide Image Optimizer',
-        accelerator: 'Command+H',
-        selector: 'hide:'
+        accelerator: 'Command+H'
       },
       {
         label: 'Hide Others',
-        accelerator: 'Command+Shift+H',
-        selector: 'hideOtherApplications:'
+        accelerator: 'Command+Shift+H'
       },
       {
-        label: 'Show All',
-        selector: 'unhideAllApplications:'
+        label: 'Show All'
       },
       {
         type: 'separator'
@@ -60,12 +60,15 @@ function createImageOptimizerMenu (context) {
       }
     ]
   }
+  return []
 }
 
-module.exports = context => {
+export const createMenu = (
+  context: BrowserWindow
+): MenuItemConstructorOptions[] => {
   const imageOptimizer = {
     label: 'Image Optimizer',
-    submenu: createImageOptimizerMenu(context)
+    submenu: createSubmenu(context)
   }
 
   const file = {
@@ -77,8 +80,9 @@ module.exports = context => {
           const { filePaths } = await dialog.showOpenDialog({
             properties: ['openFile', 'openDirectory', 'multiSelections']
           })
+          console.log(filePaths)
           if (filePaths.length) {
-            const files = readFileOrDir(filePaths)
+            const files = getFilesOrDirs(filePaths)
             const optimizer = new ImageOptimizer(files, context)
             context.webContents.send('drop-from-dialog')
             optimizer.start()
@@ -87,7 +91,7 @@ module.exports = context => {
         accelerator: 'CommandOrControl+O'
       }
     ]
-  }
+  } as MenuItemConstructorOptions
 
   const help = {
     label: 'Help',
@@ -108,9 +112,32 @@ module.exports = context => {
         }
       },
       {
+        label: 'Donate',
+        submenu: [
+          {
+            label: 'PayPal',
+            click () {
+              shell.openExternal('https://paypal.me/antonreshetov')
+            }
+          },
+          {
+            label: 'Patreon',
+            click () {
+              shell.openExternal('https://patreon.com/antonreshetov')
+            }
+          },
+          {
+            label: 'Ko-Fi',
+            click () {
+              shell.openExternal('https://ko-fi.com/antonreshetov')
+            }
+          }
+        ]
+      },
+      {
         label: 'About',
         click () {
-          dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
+          dialog.showMessageBox(BrowserWindow.getFocusedWindow()!, {
             title: 'Image Optimizer',
             message: 'Image Optimizer',
             type: 'info',
@@ -128,7 +155,7 @@ module.exports = context => {
         }
       }
     ]
-  }
+  } as MenuItemConstructorOptions
 
   return [imageOptimizer, file, help]
 }

@@ -3,64 +3,51 @@
     ref="dragarea"
     class="app-drag-area"
     @drop="onDrop"
-    @dragleave="$emit('hide', true)"
+    @dragleave="onDragLeave"
   >
     <div class="hero">
-      <AppLogo />
+      <SvgLogo
+        viewBox="0 0 256 256"
+        width="150"
+        height="150"
+      />
       <h2>Drag files or folder here</h2>
       <p>support only JPG, PNG, GIF and SVG</p>
     </div>
   </div>
 </template>
 
-<script>
-import AppLogo from '@/components/ui/AppLogo.vue'
+<script setup lang="ts">
 import { ipc } from '@/electron'
+import { useStore } from '@/store'
+import type { DroppedFile } from '@/types'
 
-export default {
-  name: 'AppDragArea',
+const store = useStore()
 
-  components: {
-    AppLogo
-  },
+const onDrop = (e: DragEvent) => {
+  e.stopPropagation()
+  store.showFileList = true
 
-  props: {
-    hide: {
-      type: Boolean,
-      default: false
-    }
-  },
+  if (e.dataTransfer?.files) {
+    const files = Array.from(e.dataTransfer.files).map(f => {
+      return {
+        name: f.name,
+        path: f.path,
+        type: f.type
+      } as DroppedFile
+    })
 
-  emits: ['hide'],
-
-  data () {
-    return {}
-  },
-
-  created () {
-    ipc.on('drop-from-dialog', () => this.$emit('hide', true))
-  },
-
-  methods: {
-    onDrop (e) {
-      e.preventDefault()
-      this.$emit('hide', true)
-
-      const files = Array.from(e.dataTransfer.files).map(f => {
-        return {
-          name: f.name,
-          path: f.path,
-          type: f.type
-        }
-      })
-
-      ipc.send('drop', files, () => {})
-    }
+    ipc.send('drop', files, () => {})
   }
+}
+const onDragLeave = (e: DragEvent) => {
+  e.preventDefault()
+  store.showFileList = true
 }
 </script>
 
 <style lang="scss" scoped>
+
 .app-drag-area {
   border: 2px dashed var(--color-gray-300);
   border-radius: 6px;
@@ -73,8 +60,6 @@ export default {
   z-index: 1000;
   svg {
     fill: var(--color-gray-300);
-    width: 150px;
-    //   transform: rotate(-90deg);
   }
 }
 .hero {

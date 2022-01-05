@@ -7,14 +7,8 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'AppPreloader',
+<script setup lang="ts">
 
-  data () {
-    return {}
-  }
-}
 </script>
 
 <style lang="scss" scoped>

@@ -1,16 +1,20 @@
-const { isFile, isFolder, getFileSize } = require('./utils')
-const { ensureDirSync, readFile, writeFile, readdir } = require('fs-extra')
-const { execFile } = require('child_process')
-const mozjpeg = require('mozjpeg')
-const pngquant = require('pngquant-bin')
-const gifsicle = require('gifsicle')
-const svg = require('svgo')
-const junk = require('junk')
-const mime = require('mime-types')
-const queue = require('queue')
-const store = require('../main/store')
-const path = require('path')
-const util = require('util')
+import { isFile, isFolder, getFileSize } from './utils'
+import { ensureDirSync, readFile, writeFile, readdir } from 'fs-extra'
+import { execFile } from 'child_process'
+import mozjpeg from 'mozjpeg'
+import pngquant from 'pngquant-bin'
+import gifsicle from 'gifsicle'
+import svg from 'svgo'
+import junk from 'junk'
+import mime from 'mime-types'
+import queue from 'queue'
+import path from 'path'
+import util from 'util'
+import { store } from '../main/store'
+import type { BrowserWindow } from 'electron'
+import type { DroppedFile } from '../renderer/types'
+import type { FileOutput, FileSize } from './types'
+
 const readdirAsync = util.promisify(readdir)
 
 const MIN_FOLDER = 'minified'
@@ -23,11 +27,12 @@ const MIME_TYPE_ENUM = {
   folder: ''
 }
 
-class ImageOptimizer {
-  #queue
+export class ImageOptimizer {
+  #queue: queue
   #context
+  files: DroppedFile[]
 
-  constructor (files = [], context) {
+  constructor (files: DroppedFile[] = [], context: BrowserWindow) {
     this.#queue = queue({ results: [], concurrency: 10 })
     this.#context = context
 
@@ -38,17 +43,18 @@ class ImageOptimizer {
     const timeStart = new Date()
 
     this.#context.webContents.send('optimization-start')
+
     this.#optimize(this.files)
     this.#queue.on('end', () => {
       const timeEnd = new Date()
-      const timeSpent = `${(timeEnd - timeStart) / 1000}s`
+      const timeSpent = `${(timeEnd.valueOf() - timeStart.valueOf()) / 1000}s`
 
       this.#context.webContents.send('optimization-complete')
       this.#context.webContents.send('job-time', timeSpent)
     })
   }
 
-  #optimize (files) {
+  #optimize (files: DroppedFile[]) {
     files.forEach(async file => {
       if (!Object.values(MIME_TYPE_ENUM).includes(file.type)) {
         return
@@ -75,8 +81,8 @@ class ImageOptimizer {
 
       if (isFolder(file.path)) {
         const folderPath = file.path
-        const files = await readdirAsync(file.path)
-        const _files = []
+        const files = await readdirAsync(file.path) as string[]
+        const _files: DroppedFile[] = []
 
         files.filter(junk.not).forEach(file => {
           if (isFolder(`${folderPath}/${file}`)) return
@@ -84,7 +90,7 @@ class ImageOptimizer {
           _files.push({
             name: file,
             path: `${folderPath}/${file}`,
-            type: mime.lookup(file)
+            type: mime.lookup(file) as string
           })
         })
 
@@ -97,10 +103,10 @@ class ImageOptimizer {
     this.#queue.start()
   }
 
-  #processFile = (file, output, context) => {
+  #processFile = (file: DroppedFile, output: string) => {
     const originalSize = getFileSize(file.path)
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       switch (file.type) {
         case MIME_TYPE_ENUM.jpg: {
           const { quality } = store.app.get('mozjpeg')
@@ -184,26 +190,22 @@ class ImageOptimizer {
     })
   }
 
-  #formatOutputData (file, originalSize, compressedSize) {
+  #formatOutputData (file: DroppedFile, originalSize: FileSize, compressedSize: FileSize): FileOutput {
     return {
       name: file.name,
       path: file.path,
       originalSize,
       compressedSize,
-      compressionPercentage: Math.abs(
+      compressionPercentage: Number(Math.abs(
         compressedSize.bytes * (100 / originalSize.bytes) - 100
-      ).toFixed(2)
+      ).toFixed(2))
     }
   }
 
-  #sendToRenderer (file, originalSize, compressedSize) {
+  #sendToRenderer (file: DroppedFile, originalSize: FileSize, compressedSize: FileSize) {
     this.#context.webContents.send(
       'file-complete',
       this.#formatOutputData(file, originalSize, compressedSize)
     )
   }
-}
-
-module.exports = {
-  ImageOptimizer
 }

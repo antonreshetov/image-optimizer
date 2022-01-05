@@ -12,41 +12,31 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'AppInput',
+<script setup lang="ts">import { computed } from 'vue'
 
-  inheritAttrs: false,
-
-  props: {
-    modelValue: {
-      type: [String, Number],
-      default: ''
-    },
-    type: {
-      type: String,
-      default: 'text' // number
-    },
-    valid: {
-      type: Boolean,
-      default: true
-    }
-  },
-
-  emits: ['update:modelValue'],
-
-  computed: {
-    value: {
-      get () {
-        return this.modelValue
-      },
-      set (v) {
-        this.$emit('update:modelValue', v)
-        this.$forceUpdate()
-      }
-    }
-  }
+interface Props {
+  modelValue: string | number
+  type: 'text' | 'number'
+  valid: boolean
 }
+
+interface Emits {
+  (e: 'update:modelValue', value: string | number): void
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  valid: true,
+  type: 'text'
+})
+
+const emit = defineEmits<Emits>()
+
+const value = computed({
+  get: () => props.modelValue,
+  set: v => {
+    emit('update:modelValue', v)
+  }
+})
 </script>
 
 <style lang="scss" scoped>

@@ -1,6 +1,7 @@
-const Store = require('electron-store')
+import Store from 'electron-store'
+import type { StoreSchema } from '../../types'
 
-const app = new Store({
+export default new Store<StoreSchema>({
   name: 'app',
   watch: true,
 
@@ -55,5 +56,3 @@ const app = new Store({
     }
   }
 })
-
-module.exports = app

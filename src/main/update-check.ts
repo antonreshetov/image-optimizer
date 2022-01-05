@@ -1,8 +1,9 @@
-const axios = require('axios')
-const { version } = require('../../package.json')
+import axios from 'axios'
+import type { BrowserWindow } from 'electron'
+import { version } from '../../package.json'
 const isDev = process.env.NODE_ENV === 'development'
 
-async function checkForUpdate (context) {
+export async function checkForUpdate (context: BrowserWindow) {
   if (isDev) return
 
   const res = await axios.get(
@@ -18,8 +19,4 @@ async function checkForUpdate (context) {
       context.webContents.send('update-available')
     }
   }
-}
-
-module.exports = {
-  checkForUpdate
 }

@@ -1,18 +1,20 @@
-const fs = require('fs')
-const path = require('path')
-const mime = require('mime-types')
+import fs from 'fs'
+import path from 'path'
+import mime from 'mime-types'
+import type { FileSize } from '../types'
+import type { DroppedFile } from '../../renderer/types'
 
-function isFile (path) {
+export const isFile = (path: string) => {
   const stat = fs.lstatSync(path)
   return stat.isFile()
 }
 
-function isFolder (path) {
+export const isFolder = (path: string) => {
   const stat = fs.lstatSync(path)
   return stat.isDirectory()
 }
 
-function getFileSize (path) {
+export const getFileSize = (path: string): FileSize => {
   const stat = fs.lstatSync(path)
   return {
     bytes: stat.size,
@@ -20,18 +22,18 @@ function getFileSize (path) {
   }
 }
 
-function getFilesOrDirs (paths) {
+export const getFilesOrDirs = (paths: string[]): DroppedFile[] => {
   return paths.map(p => {
     const { name, ext } = path.parse(p)
     return {
       name: name + ext,
       path: p,
-      type: isFolder(p) ? '' : mime.lookup(p)
+      type: isFolder(p) ? '' : mime.lookup(p) as string
     }
   })
 }
 
-function formatBytes (bytes, decimals = 2) {
+export const formatBytes = (bytes: number, decimals = 2) => {
   if (bytes === 0) return '0 Bytes'
 
   const k = 1024
@@ -41,11 +43,4 @@ function formatBytes (bytes, decimals = 2) {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
 
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
-}
-
-module.exports = {
-  isFile,
-  isFolder,
-  getFileSize,
-  readFileOrDir: getFilesOrDirs
 }

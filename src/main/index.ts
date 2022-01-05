@@ -1,17 +1,19 @@
-const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron')
-const path = require('path')
-const store = require('./store')
-const { ImageOptimizer } = require('./image-compressor')
-const menu = require('./menu')
-const { checkForUpdate } = require('./update-check')
+import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron'
+import path from 'path'
+import { store } from './store'
+import { checkForUpdate } from './update-check'
+import { ImageOptimizer } from './image-compressor'
+import { createMenu } from './menu'
 
-let mainWindow
+const isDev = process.env.NODE_ENV === 'development'
+let mainWindow: BrowserWindow
 
 function createWindow () {
+  const bounds = store.app.get('bounds')
   mainWindow = new BrowserWindow({
     width: 550,
     height: 370,
-    ...store.app.get('bounds'),
+    ...bounds,
     titleBarStyle: 'hidden',
     resizable: false,
     backgroundColor: '#212123',
@@ -22,18 +24,16 @@ function createWindow () {
     }
   })
 
-  if (process.env.NODE_ENV === 'development') {
+  if (isDev) {
     const rendererPort = process.argv[2]
     mainWindow.loadURL(`http://localhost:${rendererPort}`)
     mainWindow.webContents.openDevTools({ mode: 'detach' })
   } else {
-    mainWindow.loadFile(path.resolve(app.getAppPath(), 'renderer/index.html'))
+    mainWindow.loadFile(path.resolve(app.getAppPath(), 'src/renderer/index.html'))
   }
 
-  mainWindow.on('close', e => {
-    if (typeof mainWindow.getBounds() === 'object') {
-      store.app.set('bounds', mainWindow.getBounds())
-    }
+  mainWindow.on('close', () => {
+    store.app.set('bounds', mainWindow.getBounds())
   })
 
   return { mainWindow }
@@ -42,10 +42,17 @@ function createWindow () {
 function init () {
   createWindow()
   checkForUpdate(mainWindow)
-  Menu.setApplicationMenu(Menu.buildFromTemplate(menu(mainWindow)))
+  Menu.setApplicationMenu(Menu.buildFromTemplate(createMenu(mainWindow)))
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  if (isDev) {
+    const { default: installExtension, VUEJS3_DEVTOOLS } = await import(
+      'electron-devtools-installer'
+    )
+    installExtension(VUEJS3_DEVTOOLS)
+  }
+
   init()
 
   app.on('activate', function () {
@@ -60,7 +67,7 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
 
-ipcMain.on('drop', (event, files = []) => {
+ipcMain.on('drop', (_, files = []) => {
   const optimizer = new ImageOptimizer(files, mainWindow)
   optimizer.start()
 })

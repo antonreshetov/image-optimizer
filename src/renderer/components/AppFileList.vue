@@ -23,7 +23,7 @@
         <div class="label">
           Current Job Time:
         </div>
-        <h2>{{ jobTime }}</h2>
+        <h2>{{ store.jobTime }}</h2>
       </div>
     </div>
     <div class="list__body">
@@ -42,7 +42,7 @@
         </thead>
         <tbody>
           <tr
-            v-for="(i, index) in files"
+            v-for="(i, index) in store.files"
             :key="index"
             :class="(index + 1) % 2 === 0 ? 'event' : 'odd'"
           >
@@ -60,83 +60,52 @@
   </div>
 </template>
 
-<script>
-import { ipc, store } from '@/electron'
-import AppPreloader from '@/components/ui/AppPreloader.vue'
+<script setup lang="ts">
+import { ipc, store as electronStore } from '@/electron'
+import { computed, ref, onUnmounted } from 'vue'
+import type { FileOutput } from '../../main/types'
+import { formatBytes } from '../../main/utils'
+import { useStore } from '@/store'
 
-export default {
-  name: 'AppFileList',
+const store = useStore()
 
-  components: {
-    AppPreloader
-  },
+const total = computed(() => {
+  const percentage = Number(
+    Math.abs(
+      store.totalFiles.compressedSize * (100 / store.totalFiles.originalSize) -
+        100
+    ).toFixed(2)
+  )
 
-  emits: ['file-list-empty'],
-
-  data () {
-    return {
-      files: [],
-      totalFiles: {
-        originalSize: 0,
-        compressedSize: 0
-      },
-      jobTime: '-',
-      showPreloader: false
-    }
-  },
-
-  computed: {
-    total () {
-      const percentage = Math.abs(
-        this.totalFiles.compressedSize * (100 / this.totalFiles.originalSize) -
-          100
-      ).toFixed(2)
-      return {
-        originalSize: this.formatBytes(this.totalFiles.originalSize),
-        compressedSize: this.formatBytes(this.totalFiles.compressedSize),
-        compressionPercentage: isNaN(percentage) ? 0 : percentage
-      }
-    }
-  },
-
-  created () {
-    ipc.on('file-complete', (e, file) => {
-      this.files.push(file)
-      this.totalFiles.originalSize += file.originalSize.bytes
-      this.totalFiles.compressedSize += file.compressedSize.bytes
-    })
-    ipc.on('optimization-start', () => {
-      if (store.get('clearResultList')) {
-        this.files = []
-      }
-      this.showPreloader = true
-      this.jobTime = '-'
-    })
-    ipc.on('optimization-complete', () => {
-      this.showPreloader = false
-      if (this.files.length === 0) {
-        this.$emit('file-list-empty')
-      }
-    })
-    ipc.on('job-time', (e, time) => {
-      this.jobTime = time
-    })
-  },
-
-  methods: {
-    formatBytes (bytes, decimals = 2) {
-      if (bytes === 0) return '0 Bytes'
-
-      const k = 1024
-      const dm = decimals < 0 ? 0 : decimals
-      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-
-      const i = Math.floor(Math.log(bytes) / Math.log(k))
-
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
-    }
+  return {
+    originalSize: formatBytes(store.totalFiles.originalSize),
+    compressedSize: formatBytes(store.totalFiles.compressedSize),
+    compressionPercentage: isNaN(percentage) ? 0 : percentage
   }
-}
+})
+
+ipc.on('file-complete', (_, file: FileOutput) => {
+  store.files.push(file)
+  store.totalFiles.originalSize += file.originalSize.bytes
+  store.totalFiles.compressedSize += file.compressedSize.bytes
+})
+
+ipc.on('optimization-start', () => {
+  if (electronStore.get('clearResultList')) {
+    store.files = []
+  }
+  store.jobTime = '-'
+})
+
+ipc.on('job-time', (_, time) => {
+  store.jobTime = time
+})
+
+onUnmounted(() => {
+  ipc.removeListeners('file-complete')
+  ipc.removeListeners('optimization-start')
+  ipc.removeListeners('job-time')
+})
 </script>
 
 <style lang="scss" scoped>
@@ -166,8 +135,6 @@ export default {
     width: 100%;
     position: relative;
     border-collapse: collapse;
-    thead {
-    }
     th {
       background-color: var(--color-bg);
       position: sticky;

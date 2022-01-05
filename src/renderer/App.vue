@@ -1,12 +1,10 @@
 <template>
   <div class="app-tool-bar" />
   <main>
-    <keep-alive>
-      <component :is="component" />
-    </keep-alive>
+    <RouterView />
   </main>
   <footer>
-    <AppFooter @action="onFooterAction" />
+    <AppFooter />
   </footer>
   <canvas
     ref="canvas"
@@ -14,83 +12,45 @@
   />
 </template>
 
-<script>
-import AppDragArea from '@/components/AppDragArea.vue'
-import AppFileList from '@/components/AppFileList.vue'
-import AppFooter from '@/components/AppFooter.vue'
-import AppMain from '@/components/AppMain.vue'
-import AppSettings from '@/components/AppSettings.vue'
-import { ipc, store } from '@/electron'
+<script setup lang="ts">
+import { useStore } from '@/store'
+import type { CreateTypes } from 'canvas-confetti'
 import confetti from 'canvas-confetti'
+import { ipc } from '@/electron'
+import { onMounted, ref } from 'vue'
+import router from '@/router'
 
-export default {
-  name: 'App',
+const store = useStore()
+const canvas = ref<HTMLCanvasElement>()
+let confettiInstance: CreateTypes
 
-  components: {
-    AppDragArea,
-    AppFileList,
-    AppFooter,
-    AppMain,
-    AppSettings
-  },
+// По какой то причине необходимо явно установить роут в '/'
+// для корректного поведения в продакшен сборке
+router.push('/')
 
-  provide () {
-    return {
-      root: this
-    }
-  },
+onMounted(() => {
+  confettiInstance = confetti.create(canvas.value!)
+})
 
-  data () {
-    return {
-      component: 'AppMain',
-      confetti: null,
-      animationOnCompletion: store.get('animationOnCompletion'),
-      updateAvailable: false
-    }
-  },
-
-  created () {
-    ipc.send('message', 'Hello from App.vue!', () => {})
-    ipc.on('menu:preferences', () => {
-      this.component = 'AppSettings'
-    })
-    ipc.on('optimization-complete', () => {
-      if (this.animationOnCompletion) {
-        this.runConfetti()
-      }
-    })
-    store.on('animationOnCompletion', v => {
-      this.animationOnCompletion = v
-    })
-  },
-
-  mounted () {
-    this.confetti = confetti.create(this.$refs.canvas)
-  },
-
-  methods: {
-    onDragOver (e) {
-      e.preventDefault()
-      this.isDragAreaShow = true
-    },
-    onDragLeave (e) {
-      e.preventDefault()
-    },
-    onFooterAction (event) {
-      if (event === 'settings') {
-        this.component = 'AppSettings'
-      } else {
-        this.component = 'AppMain'
-      }
-    },
-    runConfetti () {
-      this.confetti({
-        particleCount: 200,
-        origin: { y: 1 }
-      })
-    }
-  }
+const runConfetti = () => {
+  confettiInstance({
+    particleCount: 200,
+    origin: { y: 1 }
+  })
 }
+
+ipc.on('optimization-complete', () => {
+  if (store.settings.animationOnCompletion) {
+    runConfetti()
+  }
+})
+ipc.on('menu:preferences', () => {
+  router.push('/settings')
+})
+
+ipc.on('drop-from-dialog', () => {
+  store.showFileList = true
+})
 </script>
 
 <style lang="scss">

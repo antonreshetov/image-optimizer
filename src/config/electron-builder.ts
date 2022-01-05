@@ -1,51 +1,42 @@
-const path = require('path')
+import type { Configuration } from 'electron-builder'
+import path from 'path'
 
-/**
- * https://www.electron.build/configuration/configuration
- */
-const config = {
-  productName: 'Image Optimizer',
-  appId: 'com.antonreshetov.image-optimizer',
+export default {
+  appId: 'com.example.app',
   directories: {
-    output: path.resolve(__dirname, '../dist')
+    output: path.resolve(__dirname, '../../../dist')
   },
   nsis: {
     oneClick: false,
     perMachine: false,
     allowToChangeInstallationDirectory: true,
-    shortcutName: 'Image Optimizer'
+    shortcutName: 'Electron App'
   },
   mac: {
-    icon: 'build/icons/icon.icns',
     target: [
       { target: 'dmg', arch: 'arm64' },
       { target: 'dmg', arch: 'x64' }
     ]
   },
   win: {
-    icon: 'build/icons/icon.ico',
     target: 'nsis'
   },
   linux: {
     target: ['snap']
+  },
+  extraMetadata: {
+    main: 'src/main/index.js'
   },
   files: [
     '!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}',
     '!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}',
     '!**/node_modules/*.d.ts',
     '!**/node_modules/.bin',
-    '!src/renderer',
-    '!config',
-    '!README.md',
-    '!scripts',
-    '!build',
-    '!dist',
+    'package.json',
     {
-      from: 'build/renderer',
-      to: 'renderer',
-      filter: ['**/*']
+      from: 'build/src',
+      to: 'src',
+      filter: ['main/**/*.js', 'renderer/**/*']
     }
   ]
-}
-
-module.exports = config
+} as Configuration

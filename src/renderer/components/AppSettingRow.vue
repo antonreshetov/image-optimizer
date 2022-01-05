@@ -17,25 +17,13 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'AppSettingsRow',
-
-  props: {
-    title: {
-      type: String,
-      default: ''
-    },
-    desc: {
-      type: String,
-      default: ''
-    }
-  },
-
-  data () {
-    return {}
-  }
+<script setup lang="ts">
+interface Props {
+  title: string
+  desc?: string
 }
+
+defineProps<Props>()
 </script>
 
 <style lang="scss" scoped>
@@ -45,6 +33,9 @@ export default {
   justify-content: space-between;
   margin-bottom: 10px;
   min-height: 24px;
+  .title {
+    user-select: none;
+  }
 }
 
 .field {
