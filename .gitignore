@@ -1,0 +1,8 @@
+node_modules
+dist
+build/*
+!build/icons
+
+.vscode
+.idea
+.DS_Store
