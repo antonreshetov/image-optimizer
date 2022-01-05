@@ -17,7 +17,7 @@ import { useStore } from '@/store'
 import type { CreateTypes } from 'canvas-confetti'
 import confetti from 'canvas-confetti'
 import { ipc } from '@/electron'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import router from '@/router'
 
 const store = useStore()
@@ -52,7 +52,6 @@ ipc.on('drop-from-dialog', () => {
   console.log('as')
   store.showFileList = true
 })
-
 </script>
 
 <style lang="scss">
