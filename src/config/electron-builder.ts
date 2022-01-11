@@ -28,6 +28,12 @@ export default {
   extraMetadata: {
     main: 'src/main/index.js'
   },
+  fileAssociations: [
+    { name: 'JPG', ext: 'jpg' },
+    { name: 'PNG', ext: 'png' },
+    { name: 'GIF', ext: 'gif' },
+    { name: 'SVG', ext: 'svg' }
+  ],
   files: [
     '!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}',
     '!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}',
