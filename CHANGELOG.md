@@ -1,3 +1,12 @@
+## [1.3.1](https://github.com/antonreshetov/image-optimizer/compare/v1.3.0...v1.3.1) (2022-01-11)
+
+
+### Features
+
+* add file associations to app ([#11](https://github.com/antonreshetov/image-optimizer/issues/11)) ([3ae9516](https://github.com/antonreshetov/image-optimizer/commit/3ae95168f4d097727c5437df9cea87334125c52e))
+
+
+
 # [1.3.0](https://github.com/antonreshetov/image-optimizer/compare/v1.2.0...v1.3.0) (2021-12-04)
 
 
