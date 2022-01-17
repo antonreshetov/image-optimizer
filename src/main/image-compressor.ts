@@ -1,5 +1,12 @@
 import { isFile, isFolder, getFileSize } from './utils'
-import { ensureDirSync, readFile, writeFile, readdir } from 'fs-extra'
+import {
+  ensureDirSync,
+  readFile,
+  writeFile,
+  readdir,
+  copyFileSync,
+  unlinkSync
+} from 'fs-extra'
 import { execFile } from 'child_process'
 import mozjpeg from 'mozjpeg'
 import pngquant from 'pngquant-bin'
@@ -81,7 +88,7 @@ export class ImageOptimizer {
 
       if (isFolder(file.path)) {
         const folderPath = file.path
-        const files = await readdirAsync(file.path) as string[]
+        const files = (await readdirAsync(file.path)) as string[]
         const _files: DroppedFile[] = []
 
         files.filter(junk.not).forEach(file => {
@@ -111,9 +118,20 @@ export class ImageOptimizer {
         case MIME_TYPE_ENUM.jpg: {
           const { quality } = store.app.get('mozjpeg')
 
+          let originalFile: string
+          const isAddTempFile =
+            !store.app.get('addToSubfolder') && !store.app.get('addMinSuffix')
+
+          if (isAddTempFile) {
+            originalFile = output + '.tmp'
+            copyFileSync(file.path, originalFile)
+          } else {
+            originalFile = file.path
+          }
+
           execFile(
             mozjpeg,
-            ['-quality', `${quality}`, '-outfile', output, file.path],
+            ['-quality', `${quality}`, '-outfile', output, originalFile],
             err => {
               if (err) {
                 console.log(err)
@@ -122,6 +140,7 @@ export class ImageOptimizer {
 
               const compressedSize = getFileSize(output)
               this.#sendToRenderer(file, originalSize, compressedSize)
+              if (isAddTempFile) unlinkSync(originalFile)
               resolve()
             }
           )
@@ -190,19 +209,29 @@ export class ImageOptimizer {
     })
   }
 
-  #formatOutputData (file: DroppedFile, originalSize: FileSize, compressedSize: FileSize): FileOutput {
+  #formatOutputData (
+    file: DroppedFile,
+    originalSize: FileSize,
+    compressedSize: FileSize
+  ): FileOutput {
     return {
       name: file.name,
       path: file.path,
       originalSize,
       compressedSize,
-      compressionPercentage: Number(Math.abs(
-        compressedSize.bytes * (100 / originalSize.bytes) - 100
-      ).toFixed(2))
+      compressionPercentage: Number(
+        Math.abs(
+          compressedSize.bytes * (100 / originalSize.bytes) - 100
+        ).toFixed(2)
+      )
     }
   }
 
-  #sendToRenderer (file: DroppedFile, originalSize: FileSize, compressedSize: FileSize) {
+  #sendToRenderer (
+    file: DroppedFile,
+    originalSize: FileSize,
+    compressedSize: FileSize
+  ) {
     this.#context.webContents.send(
       'file-complete',
       this.#formatOutputData(file, originalSize, compressedSize)
