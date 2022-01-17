@@ -1,3 +1,12 @@
+## [1.3.2](https://github.com/antonreshetov/image-optimizer/compare/v1.3.1...v1.3.2) (2022-01-17)
+
+
+### Bug Fixes
+
+* jpeg compression in place [#12](https://github.com/antonreshetov/image-optimizer/issues/12) ([#13](https://github.com/antonreshetov/image-optimizer/issues/13)) ([7d1fd7b](https://github.com/antonreshetov/image-optimizer/commit/7d1fd7b913aaccc3a902510f561bfd9a14ecc050))
+
+
+
 ## [1.3.1](https://github.com/antonreshetov/image-optimizer/compare/v1.3.0...v1.3.1) (2022-01-11)
 
 
