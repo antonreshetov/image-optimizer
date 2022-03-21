@@ -1,5 +1,7 @@
 import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron'
+import type { Rectangle } from 'electron'
 import path from 'path'
+import { platform } from 'process'
 import { store } from './store'
 import { checkForUpdate } from './update-check'
 import { ImageOptimizer } from './image-compressor'
@@ -8,12 +10,21 @@ import { createMenu } from './menu'
 const isDev = process.env.NODE_ENV === 'development'
 let mainWindow: BrowserWindow
 
+function getPlatform () {
+  switch (platform) {
+    case 'darwin': return 'macos'
+    case 'win32': return 'windows'
+    default: return 'linux'
+  }
+}
+
 function createWindow () {
-  const bounds = store.app.get('bounds')
+  const { x, y } = store.app.get('bounds') as Rectangle
   mainWindow = new BrowserWindow({
     width: 550,
     height: 370,
-    ...bounds,
+    x,
+    y,
     titleBarStyle: 'hidden',
     resizable: false,
     backgroundColor: '#212123',
@@ -40,6 +51,7 @@ function createWindow () {
 }
 
 function init () {
+  store.app.set('os', getPlatform())
   createWindow()
   checkForUpdate(mainWindow)
   Menu.setApplicationMenu(Menu.buildFromTemplate(createMenu(mainWindow)))
@@ -70,6 +82,14 @@ app.on('window-all-closed', function () {
 ipcMain.on('drop', (_, files = []) => {
   const optimizer = new ImageOptimizer(files, mainWindow)
   optimizer.start()
+})
+
+ipcMain.on('toolbar', (_, type) => {
+  switch (type) {
+    case 'reduce': return mainWindow.minimize()
+    case 'maximize': return mainWindow.maximize()
+    case 'close': return mainWindow.close()
+  }
 })
 
 ipcMain.on('open-url', (event, url) => {

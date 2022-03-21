@@ -1,5 +1,7 @@
 <template>
-  <div class="app-tool-bar" />
+  <header>
+    <AppTitleBar />
+  </header>
   <main>
     <RouterView />
   </main>
@@ -58,13 +60,17 @@ ipc.on('drop-from-dialog', () => {
   height: 100vh;
   overflow: hidden;
   display: grid;
-  grid-template-rows: auto var(--footer-height);
+  grid-template-rows: var(--toolbar-height) auto var(--footer-height);
   grid-template-areas:
+    'header'
     'main'
     'footer';
+  header {
+    grid-area: header;
+  }
   main {
     grid-area: main;
-    padding: var(--toolbar-height) 12px 0 12px;
+    padding: 0 12px 0 12px;
   }
   footer {
     grid-area: footer;
@@ -77,18 +83,6 @@ ipc.on('drop-from-dialog', () => {
     top: 0;
     left: 0;
     pointer-events: none;
-  }
-}
-
-.app {
-  &-tool-bar {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: var(--toolbar-height);
-    -webkit-app-region: drag;
-    z-index: 1010;
-    transition: all 0.5s;
   }
 }
 </style>

@@ -5,6 +5,7 @@
   "main": "build/src/main/index.js",
   "scripts": {
     "dev": "tsc-watch -p tsconfig.electron.json --onSuccess 'npm run dev:server'",
+    "dev:win": "tsc-watch -p tsconfig.electron.json",
     "dev:server": "node build/src/scripts/dev-server.js",
     "build:ts": "tsc -p tsconfig.electron.json",
     "build": "npm run build:ts && node build/src/scripts/build.js ",

@@ -10,6 +10,7 @@ declare module 'vue' {
     AppInput: typeof import('./../components/ui/AppInput.vue')['default']
     AppPreloader: typeof import('./../components/ui/AppPreloader.vue')['default']
     AppSettingRow: typeof import('./../components/AppSettingRow.vue')['default']
+    AppTitleBar: typeof import('./../components/AppTitleBar.vue')['default']
     AppToggle: typeof import('./../components/ui/AppToggle.vue')['default']
     SvgArrowCircleUp: typeof import('~icons/svg/arrow-circle-up')['default']
     SvgCog: typeof import('~icons/svg/cog')['default']
@@ -18,4 +19,4 @@ declare module 'vue' {
   }
 }
 
-export {}
+export { }
