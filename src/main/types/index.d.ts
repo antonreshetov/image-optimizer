@@ -23,6 +23,7 @@ declare global {
 }
 
 export interface StoreSchema {
+  os: ['macos', 'windows', 'linux']
   bounds: object
   addToSubfolder: boolean
   addMinSuffix: boolean

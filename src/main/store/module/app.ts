@@ -6,6 +6,10 @@ export default new Store<StoreSchema>({
   watch: true,
 
   schema: {
+    os: {
+      type: 'string',
+      default: 'macos'
+    },
     bounds: {
       type: 'object',
       default: {}
