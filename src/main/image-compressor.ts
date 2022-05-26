@@ -154,7 +154,7 @@ export class ImageOptimizer {
 
           if (convertPngToWebp) {
             // Convert png to webp
-            execFile(cwebp, [file.path, '-o', output], err => {
+            execFile(cwebp, [file.path, '-o', output], (err: any) => {
               if (err) {
                 console.log(err)
                 reject(err)

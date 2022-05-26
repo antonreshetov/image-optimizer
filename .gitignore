@@ -6,3 +6,6 @@ build/*
 .vscode
 .idea
 .DS_Store
+
+# Snyk
+.dccache
