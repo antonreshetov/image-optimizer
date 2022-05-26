@@ -69,8 +69,14 @@ export class ImageOptimizer {
       }
 
       if (isFile(file.path)) {
-        const { name, ext, dir } = path.parse(file.path)
+        let { name, ext, dir } = path.parse(file.path)
         const isAddToSubfolder = store.app.get('addToSubfolder')
+        const convertPngToWebp = store.app.get('convertPngToWebp')
+
+        // Converting PNG to WebP should use .webp for output filename
+        if (convertPngToWebp && ext === '.png') {
+          ext = '.webp'
+        }
 
         const fileName = store.app.get('addMinSuffix')
           ? `${name}${MIN_SUFFIX}${ext}`
@@ -152,6 +158,7 @@ export class ImageOptimizer {
           const { qualityMin, qualityMax } = store.app.get('pngquant')
           const convertPngToWebp = store.app.get('convertPngToWebp')
 
+          // If the "convertPngToWebp" config is enabled, use `cwebp` instead of `pngquant`
           if (convertPngToWebp) {
             // Convert png to webp
             execFile(cwebp, [file.path, '-o', output], (err: any) => {
