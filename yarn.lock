@@ -3914,10 +3914,10 @@ csv-parser@^1.6.0:
     minimist "^1.2.0"
     ndjson "^1.4.0"
 
-cwebp-bin@^8.0.0:
-  version "8.0.0"
-  resolved "https://registry.npmjs.org/cwebp-bin/-/cwebp-bin-8.0.0.tgz"
-  integrity sha512-j2s6jA84aG20lB0i/FBwqZGc8nHx4VASUK8OTDxy3xoUHoX/+pP6T15/TnWwhMcD0pZ05y5GgRPkurufOC8tnQ==
+cwebp-bin@6.1.2:
+  version "6.1.2"
+  resolved "https://registry.yarnpkg.com/cwebp-bin/-/cwebp-bin-6.1.2.tgz#50e90249e0df8c3d95ce8b1cc28d7cd86153005b"
+  integrity sha512-NLEZ/BVAl9g426hwUX/qrQ7b/EfQH7BS1tr+CzPo2EgDQbcdzmUVE+fIfsi64lsL638lWgzTEViMAL4pxV1GOg==
   dependencies:
     bin-build "^3.0.0"
     bin-wrapper "^4.0.1"
