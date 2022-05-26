@@ -56,7 +56,7 @@ export default new Store<StoreSchema>({
     },
     convertPngToWebp: {
       type: 'boolean',
-      default: true
+      default: false
     }
   }
 })
