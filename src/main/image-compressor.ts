@@ -11,6 +11,7 @@ import { execFile } from 'child_process'
 import mozjpeg from 'mozjpeg'
 import pngquant from 'pngquant-bin'
 import gifsicle from 'gifsicle'
+import cwebp from 'cwebp-bin'
 import svg from 'svgo'
 import junk from 'junk'
 import mime from 'mime-types'
@@ -149,17 +150,11 @@ export class ImageOptimizer {
 
         case MIME_TYPE_ENUM.png: {
           const { qualityMin, qualityMax } = store.app.get('pngquant')
+          const convertPngToWebp = store.app.get('convertPngToWebp')
 
-          execFile(
-            pngquant,
-            [
-              '--quality',
-              `${qualityMin}-${qualityMax}`,
-              '-fo',
-              output,
-              file.path
-            ],
-            err => {
+          if (convertPngToWebp) {
+            // Convert png to webp
+            execFile(cwebp, [file.path, '-o', output], err => {
               if (err) {
                 console.log(err)
                 reject(err)
@@ -168,8 +163,30 @@ export class ImageOptimizer {
               const compressedSize = getFileSize(output)
               this.#sendToRenderer(file, originalSize, compressedSize)
               resolve()
-            }
-          )
+            })
+          } else {
+            // Optimize png
+            execFile(
+              pngquant,
+              [
+                '--quality',
+                `${qualityMin}-${qualityMax}`,
+                '-fo',
+                output,
+                file.path
+              ],
+              err => {
+                if (err) {
+                  console.log(err)
+                  reject(err)
+                }
+
+                const compressedSize = getFileSize(output)
+                this.#sendToRenderer(file, originalSize, compressedSize)
+                resolve()
+              }
+            )
+          }
           break
         }
 

@@ -23,6 +23,9 @@
             :valid="validatePngQualityRange()"
           />
         </div>
+        <AppSettingRow title="Convert PNG to WebP">
+          <AppToggle v-model="convertPngToWebp" />
+        </AppSettingRow>
       </AppSettingRow>
       <AppSettingRow title="Add '.min' suffix to optimized files">
         <AppToggle v-model="addMinSuffix" />
@@ -82,6 +85,13 @@ const pngQualityMax = computed({
     if (validatePngQualityRange()) {
       electronStore.set('pngquant.qualityMax', value)
     }
+  }
+})
+const convertPngToWebp = computed({
+  get: () => store.settings.convertPngToWebp,
+  set: v => {
+    store.settings.convertPngToWebp = v
+    electronStore.set('convertPngToWebp ', v)
   }
 })
 const addMinSuffix = computed({
