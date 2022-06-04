@@ -17,7 +17,7 @@
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
     "prepare": "husky install"
   },
-  "repository": "https://github.com/antonreshetov/image-optimizer",
+  "repository": "https://github.com/christopher-hayes/image-optimizer",
   "author": {
     "name": "Anton Reshetov",
     "url": "https://github.com/antonreshetov"
@@ -87,7 +87,7 @@
   },
   "build": {
     "productName": "Image Optimizer",
-    "appId": "com.antonreshetov.image-optimizer",
+    "appId": "com.orangecode.image-optimizer-chris-hayes",
     "directories": {
       "output": "./dist"
     },
