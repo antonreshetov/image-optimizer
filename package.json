@@ -91,12 +91,6 @@
     "directories": {
       "output": "./dist"
     },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "shortcutName": "Image Optimizer"
-    },
     "mac": {
       "target": [
         { "target": "dmg", "arch": "arm64" },
@@ -106,8 +100,20 @@
     "win": {
       "target": "nsis"
     },
+    "nsis": {
+      "deleteAppDataOnUninstall": true,
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Image Optimizer"
+    },
     "linux": {
-      "target": ["snap"]
+      "desktop": {
+        "StartupNotify": "false",
+        "Encoding": "UTF-8",
+        "MimeType": "x-scheme-handler/deeplink"
+      },
+      "target": ["AppImage", "rpm", "deb"]
     },
     "extraMetadata": {
       "main": "src/main/index.js"
