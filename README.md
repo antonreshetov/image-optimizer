@@ -38,10 +38,10 @@ yarn dev
 ```
 
 ## Build
-```bash
-# build application for production
-yarn build
-```
+
+Run `yarn run build:local` to both build the Vue frontend and run the electron builder.
+
+`yarn build` is used by GitHub Actions to only build the Vue frontend.
 
 ## Related
 - [Electron Vue Vite Boilerplate](https://github.com/antonreshetov/electron-vue-vite-boilerplate)

@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "tsc-watch -p tsconfig.electron.json --onSuccess 'npm run dev:server'",
     "dev:server": "node build/src/scripts/dev-server.js",
-    "build:ts": "tsc -p tsconfig.electron.json",
-    "build": "npm run build:ts && node build/src/scripts/build.js ",
+    "build": "npm run build:ci && node build/src/scripts/build-vue.js ",
+    "build:ci": "npm run build:ci:renderer",
+    "build:ci:renderer": "tsc -p tsconfig.vue.json",
+    "build:local": "npm run build:local:electron && node build/src/scripts/build.js ",
+    "build:local:electron": "tsc -p tsconfig.electron.json",
     "lint": "eslint --ext .js,.ts,.vue . src",
     "lint:fix": "eslint --ext .js,.ts,.vue . --fix src",
     "release": "bumpp -c 'build: release v' -t",
