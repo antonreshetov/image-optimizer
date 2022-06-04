@@ -81,5 +81,51 @@
     "unplugin-vue-components": "^0.17.11",
     "vite": "^2.7.6",
     "vue-tsc": "^0.30.0"
+  },
+  "build": {
+    "productName": "Image Optimizer",
+    "appId": "com.antonreshetov.image-optimizer",
+    "directories": {
+      "output": "./dist"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Image Optimizer"
+    },
+    "mac": {
+      "target": [
+        { "target": "dmg", "arch": "arm64" },
+        { "target": "dmg", "arch": "x64" }
+      ]
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": ["snap"]
+    },
+    "extraMetadata": {
+      "main": "src/main/index.js"
+    },
+    "fileAssociations": [
+      { "name": "JPG", "ext": "jpg" },
+      { "name": "PNG", "ext": "png" },
+      { "name": "GIF", "ext": "gif" },
+      { "name": "SVG", "ext": "svg" }
+    ],
+    "files": [
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "package.json",
+      {
+        "from": "build/src",
+        "to": "src",
+        "filter": ["main/**/*.js", "renderer/**/*"]
+      }
+    ]
   }
 }
