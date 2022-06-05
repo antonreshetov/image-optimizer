@@ -18,6 +18,61 @@ A free and open source tool for optimizing images and vector graphics.
   <img src="demo.gif">
 </p>
 
+## How to Install Image Optimizer
+
+1. Go to [Releases](https://github.com/antonreshetov/image-optimizer/releases) get the latest build.
+
+### MacOS
+
+2. Download and run the `.dmg` file.
+
+### Windows
+
+2. Download and run the `.exe` file.
+
+### Linux
+
+2. Either download the `.snap` or the `.AppImage`.
+
+**Linux Snap**
+
+3. Run the bash command below inside the Downloads folder.
+
+```Bash
+sudo snap install --force-dangerous ./image-optimizer.snap
+```
+
+Replace `image-optimizer.snap` with the actual filename
+
+**Linux AppImage**
+
+To install the AppImage, right-click on the file > Properties > Permissions > "Allow executing file as program".
+
+**Notes about Snap and Appimage**
+
+Note that the Snap will move the files to `/snap/bin` and create a "Desktop file" that shows the app in global search. The AppImage does not do this - you need to create a desktop file if you want to see it in search. Additionally, this means you can delete the Snap from Downloads after installing, but the AppImage download should not be deleted unless uninstalling. The AppImage should probably be moved to a more permanent folder such as `$HOME/bin`
+
+## How to Uninstall
+
+### MacOS
+
+Delete the `Image-Optimizer.dmg` file from `/Applications`
+
+### Windows
+
+Uninstall through Windows' "Add/Remove Programs" interface.
+
+### Linux
+
+**Linux Snap**
+
+```bash
+sudo snap remove image-optimizer
+``` 
+
+**Linux AppImage**
+
+Delete the `.appimage` file.
 
 ## Core libs
  - [mozjpeg](https://github.com/mozilla/mozjpeg)
@@ -25,11 +80,9 @@ A free and open source tool for optimizing images and vector graphics.
  - [gifsicle](https://www.lcdf.org/gifsicle/)
  - [SVGO](https://github.com/svg/svgo)
 
-## Download and Installation on macOS
+## Running and Building the source code
 
-Go to [Releases](https://github.com/antonreshetov/image-optimizer/releases) get the latest build, download and install.
-
-## Development
+### Development
 ```bash
 # install dependencies
 yarn
@@ -37,7 +90,7 @@ yarn
 yarn dev
 ```
 
-## Build
+### Build
 
 Run `yarn run build:local` to both build the Vue frontend and run the electron builder.
 
