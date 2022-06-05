@@ -5,8 +5,6 @@ import { checkForUpdate } from './update-check'
 import { ImageOptimizer } from './image-compressor'
 import { createMenu } from './menu'
 
-import fs from 'fs'
-
 const isDev = process.env.NODE_ENV === 'development'
 let mainWindow: BrowserWindow
 
