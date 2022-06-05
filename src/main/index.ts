@@ -5,6 +5,8 @@ import { checkForUpdate } from './update-check'
 import { ImageOptimizer } from './image-compressor'
 import { createMenu } from './menu'
 
+import fs from 'fs'
+
 const isDev = process.env.NODE_ENV === 'development'
 let mainWindow: BrowserWindow
 
@@ -24,12 +26,29 @@ function createWindow () {
     }
   })
 
+  // Log the current filepath
+  console.log(__dirname)
+
+  // Log files in the current directory
+  console.log('__dirname:', fs.readdirSync(__dirname))
+  console.log('getAppPath():', fs.readdirSync(app.getAppPath()))
+  console.log(
+    'getAppPath()/src:',
+    fs.readdirSync(path.resolve(app.getAppPath(), 'src'))
+  )
+  console.log(
+    'getAppPath()/src/renderer:',
+    fs.readdirSync(path.resolve(app.getAppPath(), 'src/renderer'))
+  )
+
   if (isDev) {
     const rendererPort = process.argv[2]
     mainWindow.loadURL(`http://localhost:${rendererPort}`)
     mainWindow.webContents.openDevTools({ mode: 'detach' })
   } else {
-    mainWindow.loadFile(path.resolve(app.getAppPath(), 'src/renderer/index.html'))
+    mainWindow.loadFile(
+      path.resolve(app.getAppPath(), 'src/renderer/index.html')
+    )
   }
 
   mainWindow.on('close', () => {
