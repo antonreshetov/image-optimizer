@@ -71,10 +71,10 @@ export class ImageOptimizer {
       if (isFile(file.path)) {
         let { name, ext, dir } = path.parse(file.path)
         const isAddToSubfolder = store.app.get('addToSubfolder')
-        const convertPngToWebp = store.app.get('convertPngToWebp')
+        const convertToWebp = store.app.get('convertToWebp')
+        const availableExtToWebp = ['.png', '.jpg', '.jpeg']
 
-        // Converting PNG to WebP should use .webp for output filename
-        if (convertPngToWebp && ext === '.png') {
+        if (convertToWebp && availableExtToWebp.includes(ext)) {
           ext = '.webp'
         }
 
@@ -121,6 +121,19 @@ export class ImageOptimizer {
     const originalSize = getFileSize(file.path)
 
     return new Promise<void>((resolve, reject) => {
+      const toWebp = () => {
+        execFile(cwebp, [file.path, '-o', output], (err: any) => {
+          if (err) {
+            console.log(err)
+            reject(err)
+          }
+
+          const compressedSize = getFileSize(output)
+          this.#sendToRenderer(file, originalSize, compressedSize)
+          resolve()
+        })
+      }
+
       switch (file.type) {
         case MIME_TYPE_ENUM.jpg: {
           const { quality } = store.app.get('mozjpeg')
@@ -128,6 +141,7 @@ export class ImageOptimizer {
           let originalFile: string
           const isAddTempFile =
             !store.app.get('addToSubfolder') && !store.app.get('addMinSuffix')
+          const convertToWebp = store.app.get('convertToWebp')
 
           if (isAddTempFile) {
             originalFile = output + '.tmp'
@@ -136,43 +150,35 @@ export class ImageOptimizer {
             originalFile = file.path
           }
 
-          execFile(
-            mozjpeg,
-            ['-quality', `${quality}`, '-outfile', output, originalFile],
-            err => {
-              if (err) {
-                console.log(err)
-                reject(err)
-              }
+          if (convertToWebp) {
+            toWebp()
+          } else {
+            execFile(
+              mozjpeg,
+              ['-quality', `${quality}`, '-outfile', output, originalFile],
+              err => {
+                if (err) {
+                  console.log(err)
+                  reject(err)
+                }
 
-              const compressedSize = getFileSize(output)
-              this.#sendToRenderer(file, originalSize, compressedSize)
-              if (isAddTempFile) unlinkSync(originalFile)
-              resolve()
-            }
-          )
+                const compressedSize = getFileSize(output)
+                this.#sendToRenderer(file, originalSize, compressedSize)
+                resolve()
+              }
+            )
+          }
+          if (isAddTempFile) unlinkSync(originalFile)
           break
         }
 
         case MIME_TYPE_ENUM.png: {
           const { qualityMin, qualityMax } = store.app.get('pngquant')
-          const convertPngToWebp = store.app.get('convertPngToWebp')
+          const convertToWebp = store.app.get('convertToWebp')
 
-          // If the "convertPngToWebp" config is enabled, use `cwebp` instead of `pngquant`
-          if (convertPngToWebp) {
-            // Convert png to webp
-            execFile(cwebp, [file.path, '-o', output], (err: any) => {
-              if (err) {
-                console.log(err)
-                reject(err)
-              }
-
-              const compressedSize = getFileSize(output)
-              this.#sendToRenderer(file, originalSize, compressedSize)
-              resolve()
-            })
+          if (convertToWebp) {
+            toWebp()
           } else {
-            // Optimize png
             execFile(
               pngquant,
               [

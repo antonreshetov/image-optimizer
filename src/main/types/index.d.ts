@@ -36,7 +36,7 @@ export interface StoreSchema {
     qualityMin: number
     qualityMax: number
   }
-  convertPngToWebp: boolean
+  convertToWebp: boolean
 }
 
 export interface FileSize {

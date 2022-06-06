@@ -19,7 +19,7 @@ export interface AppState {
   | 'mozjpeg'
   | 'pngquant'
   | 'addMinSuffix'
-  | 'convertPngToWebp'
+  | 'convertToWebp'
   | 'clearResultList'
   | 'addToSubfolder'
   | 'animationOnCompletion'

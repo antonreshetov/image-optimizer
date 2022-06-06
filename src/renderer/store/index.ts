@@ -20,7 +20,7 @@ export const useStore = defineStore('app', {
           qualityMax: electronStore.get('pngquant.qualityMax'),
           qualityMin: electronStore.get('pngquant.qualityMin')
         },
-        convertPngToWebp: electronStore.get('convertPngToWebp'),
+        convertToWebp: electronStore.get('convertToWebp'),
         addMinSuffix: electronStore.get('addMinSuffix'),
         addToSubfolder: electronStore.get('addToSubfolder'),
         clearResultList: electronStore.get('clearResultList'),

@@ -24,8 +24,8 @@
           />
         </div>
       </AppSettingRow>
-      <AppSettingRow title="Convert PNG to WebP">
-        <AppToggle v-model="convertPngToWebp" />
+      <AppSettingRow title="Convert JPG / PNG to WebP">
+        <AppToggle v-model="convertToWebp" />
       </AppSettingRow>
       <AppSettingRow title="Add '.min' suffix to optimized files">
         <AppToggle v-model="addMinSuffix" />
@@ -87,11 +87,11 @@ const pngQualityMax = computed({
     }
   }
 })
-const convertPngToWebp = computed({
-  get: () => store.settings.convertPngToWebp,
+const convertToWebp = computed({
+  get: () => store.settings.convertToWebp,
   set: v => {
-    store.settings.convertPngToWebp = v
-    electronStore.set('convertPngToWebp', v)
+    store.settings.convertToWebp = v
+    electronStore.set('convertToWebp', v)
   }
 })
 const addMinSuffix = computed({
