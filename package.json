@@ -87,7 +87,7 @@
   },
   "build": {
     "productName": "Image Optimizer",
-    "appId": "com.orangecode.image-optimizer-chris-hayes",
+    "appId": "com.antonreshetov.image-optimizer",
     "directories": {
       "output": "./dist"
     },
