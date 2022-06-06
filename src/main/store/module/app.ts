@@ -53,6 +53,10 @@ export default new Store<StoreSchema>({
         }
       },
       default: {}
+    },
+    convertToWebp: {
+      type: 'boolean',
+      default: false
     }
   }
 })

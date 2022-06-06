@@ -14,11 +14,14 @@ export interface AppState {
   }
   jobTime: string
   showFileList: boolean
-  settings: Pick<StoreSchema,
+  settings: Pick<
+  StoreSchema,
   | 'mozjpeg'
   | 'pngquant'
   | 'addMinSuffix'
+  | 'convertToWebp'
   | 'clearResultList'
   | 'addToSubfolder'
-  | 'animationOnCompletion'>
+  | 'animationOnCompletion'
+  >
 }

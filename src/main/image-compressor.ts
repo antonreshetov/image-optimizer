@@ -11,6 +11,7 @@ import { execFile } from 'child_process'
 import mozjpeg from 'mozjpeg'
 import pngquant from 'pngquant-bin'
 import gifsicle from 'gifsicle'
+import cwebp from 'cwebp-bin'
 import svg from 'svgo'
 import junk from 'junk'
 import mime from 'mime-types'
@@ -68,8 +69,14 @@ export class ImageOptimizer {
       }
 
       if (isFile(file.path)) {
-        const { name, ext, dir } = path.parse(file.path)
+        let { name, ext, dir } = path.parse(file.path)
         const isAddToSubfolder = store.app.get('addToSubfolder')
+        const convertToWebp = store.app.get('convertToWebp')
+        const availableExtToWebp = ['.png', '.jpg', '.jpeg']
+
+        if (convertToWebp && availableExtToWebp.includes(ext)) {
+          ext = '.webp'
+        }
 
         const fileName = store.app.get('addMinSuffix')
           ? `${name}${MIN_SUFFIX}${ext}`
@@ -114,6 +121,19 @@ export class ImageOptimizer {
     const originalSize = getFileSize(file.path)
 
     return new Promise<void>((resolve, reject) => {
+      const toWebp = () => {
+        execFile(cwebp, [file.path, '-o', output], (err: any) => {
+          if (err) {
+            console.log(err)
+            reject(err)
+          }
+
+          const compressedSize = getFileSize(output)
+          this.#sendToRenderer(file, originalSize, compressedSize)
+          resolve()
+        })
+      }
+
       switch (file.type) {
         case MIME_TYPE_ENUM.jpg: {
           const { quality } = store.app.get('mozjpeg')
@@ -121,6 +141,7 @@ export class ImageOptimizer {
           let originalFile: string
           const isAddTempFile =
             !store.app.get('addToSubfolder') && !store.app.get('addMinSuffix')
+          const convertToWebp = store.app.get('convertToWebp')
 
           if (isAddTempFile) {
             originalFile = output + '.tmp'
@@ -129,47 +150,56 @@ export class ImageOptimizer {
             originalFile = file.path
           }
 
-          execFile(
-            mozjpeg,
-            ['-quality', `${quality}`, '-outfile', output, originalFile],
-            err => {
-              if (err) {
-                console.log(err)
-                reject(err)
-              }
+          if (convertToWebp) {
+            toWebp()
+          } else {
+            execFile(
+              mozjpeg,
+              ['-quality', `${quality}`, '-outfile', output, originalFile],
+              err => {
+                if (err) {
+                  console.log(err)
+                  reject(err)
+                }
 
-              const compressedSize = getFileSize(output)
-              this.#sendToRenderer(file, originalSize, compressedSize)
-              if (isAddTempFile) unlinkSync(originalFile)
-              resolve()
-            }
-          )
+                const compressedSize = getFileSize(output)
+                this.#sendToRenderer(file, originalSize, compressedSize)
+                resolve()
+              }
+            )
+          }
+          if (isAddTempFile) unlinkSync(originalFile)
           break
         }
 
         case MIME_TYPE_ENUM.png: {
           const { qualityMin, qualityMax } = store.app.get('pngquant')
+          const convertToWebp = store.app.get('convertToWebp')
 
-          execFile(
-            pngquant,
-            [
-              '--quality',
-              `${qualityMin}-${qualityMax}`,
-              '-fo',
-              output,
-              file.path
-            ],
-            err => {
-              if (err) {
-                console.log(err)
-                reject(err)
+          if (convertToWebp) {
+            toWebp()
+          } else {
+            execFile(
+              pngquant,
+              [
+                '--quality',
+                `${qualityMin}-${qualityMax}`,
+                '-fo',
+                output,
+                file.path
+              ],
+              err => {
+                if (err) {
+                  console.log(err)
+                  reject(err)
+                }
+
+                const compressedSize = getFileSize(output)
+                this.#sendToRenderer(file, originalSize, compressedSize)
+                resolve()
               }
-
-              const compressedSize = getFileSize(output)
-              this.#sendToRenderer(file, originalSize, compressedSize)
-              resolve()
-            }
-          )
+            )
+          }
           break
         }
 

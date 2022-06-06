@@ -36,6 +36,7 @@ export interface StoreSchema {
     qualityMin: number
     qualityMax: number
   }
+  convertToWebp: boolean
 }
 
 export interface FileSize {
