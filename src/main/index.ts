@@ -29,7 +29,9 @@ function createWindow () {
     mainWindow.loadURL(`http://localhost:${rendererPort}`)
     mainWindow.webContents.openDevTools({ mode: 'detach' })
   } else {
-    mainWindow.loadFile(path.resolve(app.getAppPath(), 'src/renderer/index.html'))
+    mainWindow.loadFile(
+      path.resolve(app.getAppPath(), 'src/renderer/index.html')
+    )
   }
 
   mainWindow.on('close', () => {

@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM"],
+    "outDir": "./build",
+    "paths": {
+      "@/*": ["./src/*", "./src/renderer/*"]
+    },
+    "types": [
+      "unplugin-icons/types/vue",
+    ]
+  },
+  "include": [
+    "src/config/*.ts",
+    // Only build Vue, this config file is used by GitHub Actions
+    // Собираем Vue, этот конфигурационный файл используется в GitHub Actions
+    "src/scripts/build-vue.ts",
+    "src/scripts/build-frontend.ts",
+    "src/config/*.ts",
+    "src/scripts/*.ts",
+    "src/main/**/*.ts",
+    "src/main/types",
+    "src/renderer/**/*.ts",
+    "src/renderer/**/*.d.ts",
+    "src/renderer/**/*.tsx",
+    "src/renderer/**/*.vue"
+  ],
+  "exclude":[
+    "./node_modules",
+  ]
+}

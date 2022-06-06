@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "tsc-watch -p tsconfig.electron.json --onSuccess 'npm run dev:server'",
     "dev:server": "node build/src/scripts/dev-server.js",
-    "build:ts": "tsc -p tsconfig.electron.json",
-    "build": "npm run build:ts && node build/src/scripts/build.js ",
+    "build": "npm run build:ci",
+    "build:ci": "npm run build:ci:renderer && node build/src/scripts/build-frontend.js",
+    "build:ci:renderer": "tsc -p tsconfig.vue.json",
+    "build:local": "npm run build:local:electron && node build/src/scripts/build.js ",
+    "build:local:electron": "tsc -p tsconfig.electron.json",
     "lint": "eslint --ext .js,.ts,.vue . src",
     "lint:fix": "eslint --ext .js,.ts,.vue . --fix src",
     "release": "bumpp -c 'build: release v' -t",
@@ -82,5 +85,89 @@
     "unplugin-vue-components": "^0.17.11",
     "vite": "^2.7.6",
     "vue-tsc": "^0.30.0"
+  },
+  "build": {
+    "productName": "Image Optimizer",
+    "appId": "com.antonreshetov.image-optimizer",
+    "directories": {
+      "output": "./dist"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": "x64"
+        }
+      ]
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "deleteAppDataOnUninstall": true,
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Image Optimizer"
+    },
+    "linux": {
+      "category": "Utility",
+      "desktop": {
+        "StartupNotify": "false",
+        "Encoding": "UTF-8",
+        "MimeType": "x-scheme-handler/deeplink"
+      },
+      "maintainer": "Anton Reshetov",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "snap",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "extraMetadata": {
+      "main": "src/main/index.js"
+    },
+    "fileAssociations": [
+      {
+        "name": "JPG",
+        "ext": "jpg"
+      },
+      {
+        "name": "PNG",
+        "ext": "png"
+      },
+      {
+        "name": "GIF",
+        "ext": "gif"
+      },
+      {
+        "name": "SVG",
+        "ext": "svg"
+      }
+    ],
+    "files": [
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "package.json",
+      {
+        "from": "build/src",
+        "to": "src",
+        "filter": [
+          "main/**/*.js",
+          "renderer/**/*"
+        ]
+      }
+    ]
   }
 }
