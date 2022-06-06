@@ -112,7 +112,8 @@
         "Encoding": "UTF-8",
         "MimeType": "x-scheme-handler/deeplink"
       },
-      "maintainer": "Anton Reshetov",
+      "icon": "./logo.png",
+      "maintainer": "Chris Hayes",
       "target": [
         {
           "target": "AppImage",
