@@ -18,9 +18,15 @@ A free and open source tool for optimizing images and vector graphics.
   <img src="demo.gif">
 </p>
 
+Original repo at: https://github.com/antonreshetov/image-optimizer
+
+This fork includes:
+- PNG -> WebP option
+- Multi-platform release for Macos (.dmg), Linux (.snap, .AppImage) and Windows (.exe)
+
 ## How to Install Image Optimizer
 
-1. Go to [Releases](https://github.com/antonreshetov/image-optimizer/releases) get the latest build.
+1. Go to [Releases](https://github.com/christopher-hayes/image-optimizer/releases) get the latest build.
 
 ### MacOS
 
@@ -99,4 +105,4 @@ Run `yarn run build:local` to both build the Vue frontend and run the electron b
 ## Related
 - [Electron Vue Vite Boilerplate](https://github.com/antonreshetov/electron-vue-vite-boilerplate)
 
-Copyright (c) 2021-present, Anton Reshetov.
+Contributors: [Anton Reshetov](https://github.com/antonreshetov), [Chris Hayes](https://github.com/christopher-hayes)
