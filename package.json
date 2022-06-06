@@ -17,7 +17,7 @@
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
     "prepare": "husky install"
   },
-  "repository": "https://github.com/christopher-hayes/image-optimizer",
+  "repository": "https://github.com/antonreshetov/image-optimizer",
   "author": {
     "name": "Anton Reshetov",
     "url": "https://github.com/antonreshetov"
@@ -96,10 +96,6 @@
       "target": [
         {
           "target": "dmg",
-          "arch": "arm64"
-        },
-        {
-          "target": "dmg",
           "arch": "x64"
         }
       ]
@@ -126,8 +122,7 @@
         {
           "target": "AppImage",
           "arch": [
-            "x64",
-            "ia32"
+            "x64"
           ]
         },
         {
