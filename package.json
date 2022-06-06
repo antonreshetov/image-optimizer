@@ -93,12 +93,7 @@
       "output": "./dist"
     },
     "mac": {
-      "target": [
-        {
-          "target": "dmg",
-          "arch": "x64"
-        }
-      ]
+      "target": "dmg"
     },
     "win": {
       "target": "nsis"

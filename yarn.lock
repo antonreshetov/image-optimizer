@@ -3916,7 +3916,7 @@ csv-parser@^1.6.0:
 
 cwebp-bin@6.1.2:
   version "6.1.2"
-  resolved "https://registry.yarnpkg.com/cwebp-bin/-/cwebp-bin-6.1.2.tgz#50e90249e0df8c3d95ce8b1cc28d7cd86153005b"
+  resolved "https://registry.npmjs.org/cwebp-bin/-/cwebp-bin-6.1.2.tgz"
   integrity sha512-NLEZ/BVAl9g426hwUX/qrQ7b/EfQH7BS1tr+CzPo2EgDQbcdzmUVE+fIfsi64lsL638lWgzTEViMAL4pxV1GOg==
   dependencies:
     bin-build "^3.0.0"
