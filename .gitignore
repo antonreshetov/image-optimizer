@@ -2,10 +2,10 @@ node_modules
 dist
 build/*
 !build/icons
+src/renderer/types/components.d.ts
 
 .vscode
 .idea
 .DS_Store
-
 # Snyk
 .dccache
