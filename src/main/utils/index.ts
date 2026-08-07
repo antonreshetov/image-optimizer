@@ -1,8 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import mime from 'mime-types'
-import type { FileSize } from '../types'
-import type { DroppedFile } from '../../renderer/types'
+import type { DroppedFile, FileSize } from '../../shared/ipc'
 
 export const isFile = (path: string) => {
   const stat = fs.lstatSync(path)
@@ -23,12 +22,12 @@ export const getFileSize = (path: string): FileSize => {
 }
 
 export const getFilesOrDirs = (paths: string[]): DroppedFile[] => {
-  return paths.map(p => {
+  return paths.map((p) => {
     const { name, ext } = path.parse(p)
     return {
       name: name + ext,
       path: p,
-      type: isFolder(p) ? '' : mime.lookup(p) as string
+      type: isFolder(p) ? '' : (mime.lookup(p) as string)
     }
   })
 }

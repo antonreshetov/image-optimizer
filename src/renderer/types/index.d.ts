@@ -1,12 +1,6 @@
-import type { FileOutput, StoreSchema } from '../../main/types'
+import type { FileOutput } from '../../shared/ipc'
 
-export interface DroppedFile {
-  name: string
-  path: string
-  type: string
-}
-
-export interface AppState {
+export interface OptimizationState {
   files: FileOutput[]
   totalFiles: {
     originalSize: number
@@ -14,14 +8,4 @@ export interface AppState {
   }
   jobTime: string
   showFileList: boolean
-  settings: Pick<
-  StoreSchema,
-  | 'mozjpeg'
-  | 'pngquant'
-  | 'addMinSuffix'
-  | 'convertToWebp'
-  | 'clearResultList'
-  | 'addToSubfolder'
-  | 'animationOnCompletion'
-  >
 }

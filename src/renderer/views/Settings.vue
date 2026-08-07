@@ -6,6 +6,7 @@
         <AppInput
           v-model="jpegQuality"
           type="number"
+          step="1"
           :valid="jpegQuality > 0"
         />
       </AppSettingRow>
@@ -14,13 +15,15 @@
           <AppInput
             v-model="pngQualityMin"
             type="number"
-            :valid="validatePngQualityRange()"
+            step="1"
+            :valid="isPngQualityRangeValid"
           />
           -
           <AppInput
             v-model="pngQualityMax"
             type="number"
-            :valid="validatePngQualityRange()"
+            step="1"
+            :valid="isPngQualityRangeValid"
           />
         </div>
       </AppSettingRow>
@@ -45,82 +48,55 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useStore } from '@/store'
-import { store as electronStore } from '@/electron'
+import { useSettings } from '@/composables/useSettings'
 
-const store = useStore()
+const {
+  settings,
+  setJpegQuality,
+  setPngQualityMin,
+  setPngQualityMax,
+  setConvertToWebp,
+  setAddMinSuffix,
+  setAddToSubfolder,
+  setClearResultList,
+  setAnimationOnCompletion
+} = useSettings()
 
-const getQualityNumber = (min: number, max: number, value: number) => {
-  let result = value <= min ? min : value
-  result = result > max ? max : value
-  return result
-}
-
-const validatePngQualityRange = () => pngQualityMin.value < pngQualityMax.value
+const isPngQualityRangeValid = computed(
+  () => settings.pngquant.qualityMin < settings.pngquant.qualityMax
+)
 
 const jpegQuality = computed({
-  get: () => store.settings.mozjpeg.quality,
-  set: v => {
-    const value = getQualityNumber(0, 100, Number(v))
-    store.settings.mozjpeg.quality = v
-    console.log(value)
-    electronStore.set('mozjpeg.quality', value)
-  }
+  get: () => settings.mozjpeg.quality,
+  set: setJpegQuality
 })
 const pngQualityMin = computed({
-  get: () => store.settings.pngquant.qualityMin,
-  set: v => {
-    const value = getQualityNumber(0, 99, Number(v))
-    store.settings.pngquant.qualityMin = value
-    if (validatePngQualityRange()) {
-      electronStore.set('pngquant.qualityMin', value)
-    }
-  }
+  get: () => settings.pngquant.qualityMin,
+  set: setPngQualityMin
 })
 const pngQualityMax = computed({
-  get: () => store.settings.pngquant.qualityMax,
-  set: v => {
-    const value = getQualityNumber(0, 100, Number(v))
-    store.settings.pngquant.qualityMax = value
-    if (validatePngQualityRange()) {
-      electronStore.set('pngquant.qualityMax', value)
-    }
-  }
+  get: () => settings.pngquant.qualityMax,
+  set: setPngQualityMax
 })
 const convertToWebp = computed({
-  get: () => store.settings.convertToWebp,
-  set: v => {
-    store.settings.convertToWebp = v
-    electronStore.set('convertToWebp', v)
-  }
+  get: () => settings.convertToWebp,
+  set: setConvertToWebp
 })
 const addMinSuffix = computed({
-  get: () => store.settings.addMinSuffix,
-  set: v => {
-    store.settings.addMinSuffix = v
-    electronStore.set('addMinSuffix', v)
-  }
+  get: () => settings.addMinSuffix,
+  set: setAddMinSuffix
 })
 const addToSubfolder = computed({
-  get: () => store.settings.addToSubfolder,
-  set: v => {
-    store.settings.addToSubfolder = v
-    electronStore.set('addToSubfolder', v)
-  }
+  get: () => settings.addToSubfolder,
+  set: setAddToSubfolder
 })
 const clearResultList = computed({
-  get: () => store.settings.clearResultList,
-  set: v => {
-    store.settings.clearResultList = v
-    electronStore.set('clearResultList', v)
-  }
+  get: () => settings.clearResultList,
+  set: setClearResultList
 })
 const animationOnCompletion = computed({
-  get: () => store.settings.animationOnCompletion,
-  set: v => {
-    store.settings.animationOnCompletion = v
-    electronStore.set('animationOnCompletion', v)
-  }
+  get: () => settings.animationOnCompletion,
+  set: setAnimationOnCompletion
 })
 </script>
 

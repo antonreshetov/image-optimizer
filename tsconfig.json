@@ -4,7 +4,7 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
     "strict": true,
     "jsx": "preserve",
     "sourceMap": true,
@@ -22,9 +22,7 @@
     "src/renderer/**/*.d.ts",
     "src/renderer/**/*.tsx",
     "src/renderer/**/*.vue",
-    "src/main/types"
+    "src/shared/**/*.ts"
   ],
-  "exclude":[
-    "./node_modules"
-  ]
+  "exclude": ["./node_modules"]
 }

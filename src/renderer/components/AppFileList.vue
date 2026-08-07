@@ -2,56 +2,42 @@
   <div class="list">
     <div class="list__header">
       <div class="list__header-item">
-        <div class="label">
-          Original Size:
-        </div>
+        <div class="label">Original Size:</div>
         <h2>{{ total.originalSize }}</h2>
       </div>
       <div class="list__header-item">
-        <div class="label">
-          Optimized Size:
-        </div>
+        <div class="label">Optimized Size:</div>
         <h2>{{ total.compressedSize }}</h2>
       </div>
       <div class="list__header-item">
-        <div class="label">
-          Compression:
-        </div>
+        <div class="label">Compression:</div>
         <h2>{{ total.compressionPercentage }} %</h2>
       </div>
       <div class="list__header-item">
-        <div class="label">
-          Current Job Time:
-        </div>
-        <h2>{{ store.jobTime }}</h2>
+        <div class="label">Current Job Time:</div>
+        <h2>{{ state.jobTime }}</h2>
       </div>
     </div>
     <div class="list__body">
       <table>
         <thead>
           <tr>
-            <th width="280">
-              Name
-            </th>
+            <th width="280">Name</th>
             <th>Original Size</th>
             <th>Optimized Size</th>
-            <th align="right">
-              Compression
-            </th>
+            <th align="right">Compression</th>
           </tr>
         </thead>
         <tbody>
           <tr
-            v-for="(i, index) in store.files"
+            v-for="(i, index) in state.files"
             :key="index"
             :class="(index + 1) % 2 === 0 ? 'event' : 'odd'"
           >
             <td>{{ i.name }}</td>
             <td>{{ i.originalSize.readable }}</td>
             <td>{{ i.compressedSize.readable }}</td>
-            <td align="right">
-              {{ i.compressionPercentage }} %
-            </td>
+            <td align="right">{{ i.compressionPercentage }} %</td>
           </tr>
         </tbody>
       </table>
@@ -61,51 +47,56 @@
 </template>
 
 <script setup lang="ts">
-import { ipc, store as electronStore } from '@/electron'
+import { electron } from '@/electron'
 import { computed, ref, onUnmounted } from 'vue'
-import type { FileOutput } from '../../main/types'
-import { formatBytes } from '../../main/utils'
-import { useStore } from '@/store'
+import { formatBytes } from '@/utils/formatBytes'
+import { useOptimizationState } from '@/composables/useOptimizationState'
+import { useSettings } from '@/composables/useSettings'
 
-const store = useStore()
+const { state, addCompletedFile, startOptimization, setJobTime } =
+  useOptimizationState()
+const { settings } = useSettings()
 
 const total = computed(() => {
   const percentage = Number(
     Math.abs(
-      store.totalFiles.compressedSize * (100 / store.totalFiles.originalSize) -
+      state.totalFiles.compressedSize * (100 / state.totalFiles.originalSize) -
         100
     ).toFixed(2)
   )
 
   return {
-    originalSize: formatBytes(store.totalFiles.originalSize),
-    compressedSize: formatBytes(store.totalFiles.compressedSize),
+    originalSize: formatBytes(state.totalFiles.originalSize),
+    compressedSize: formatBytes(state.totalFiles.compressedSize),
     compressionPercentage: isNaN(percentage) ? 0 : percentage
   }
 })
 
-ipc.on('file-complete', (_, file: FileOutput) => {
-  store.files.push(file)
-  store.totalFiles.originalSize += file.originalSize.bytes
-  store.totalFiles.compressedSize += file.compressedSize.bytes
+const unsubscribeFileComplete = electron.onFileComplete((file) => {
+  addCompletedFile(file)
 })
 
-ipc.on('optimization-start', () => {
-  if (electronStore.get('clearResultList')) {
-    store.files = []
-  }
-  store.jobTime = '-'
+const unsubscribeOptimizationStart = electron.onOptimizationStart(() => {
+  showPreloader.value = true
+  startOptimization(settings.clearResultList)
 })
 
-ipc.on('job-time', (_, time) => {
-  store.jobTime = time
+const unsubscribeOptimizationComplete = electron.onOptimizationComplete(() => {
+  showPreloader.value = false
+})
+
+const unsubscribeJobTime = electron.onJobTime((time) => {
+  setJobTime(time)
 })
 
 onUnmounted(() => {
-  ipc.removeListeners('file-complete')
-  ipc.removeListeners('optimization-start')
-  ipc.removeListeners('job-time')
+  unsubscribeFileComplete()
+  unsubscribeOptimizationStart()
+  unsubscribeOptimizationComplete()
+  unsubscribeJobTime()
 })
+
+const showPreloader = ref(false)
 </script>
 
 <style lang="scss" scoped>

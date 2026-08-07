@@ -6,11 +6,7 @@
     @dragleave="onDragLeave"
   >
     <div class="hero">
-      <SvgLogo
-        viewBox="0 0 256 256"
-        width="150"
-        height="150"
-      />
+      <SvgLogo viewBox="0 0 256 256" width="150" height="150" />
       <h2>Drag files or folder here</h2>
       <p>support only JPG, PNG, GIF and SVG</p>
     </div>
@@ -18,36 +14,35 @@
 </template>
 
 <script setup lang="ts">
-import { ipc } from '@/electron'
-import { useStore } from '@/store'
-import type { DroppedFile } from '@/types'
+import { electron } from '@/electron'
+import { useOptimizationState } from '@/composables/useOptimizationState'
+import type { DroppedFile } from '../../shared/ipc'
 
-const store = useStore()
+const { setFileListVisible } = useOptimizationState()
 
 const onDrop = (e: DragEvent) => {
   e.stopPropagation()
-  store.showFileList = true
+  setFileListVisible(true)
 
   if (e.dataTransfer?.files) {
-    const files = Array.from(e.dataTransfer.files).map(f => {
+    const files = Array.from(e.dataTransfer.files).map((f) => {
       return {
         name: f.name,
-        path: f.path,
+        path: electron.getPathForFile(f),
         type: f.type
       } as DroppedFile
     })
 
-    ipc.send('drop', files, () => {})
+    electron.optimizeFiles(files)
   }
 }
 const onDragLeave = (e: DragEvent) => {
   e.preventDefault()
-  store.showFileList = true
+  setFileListVisible(true)
 }
 </script>
 
 <style lang="scss" scoped>
-
 .app-drag-area {
   border: 2px dashed var(--color-gray-300);
   border-radius: 6px;

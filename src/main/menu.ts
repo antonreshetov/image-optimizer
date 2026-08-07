@@ -4,6 +4,8 @@ import { version, author } from '../../package.json'
 import os from 'os'
 import { getFilesOrDirs } from './utils'
 import { ImageOptimizer } from './image-compressor'
+import { IPC_CHANNELS } from '../shared/ipc'
+import { checkForUpdates } from './updater'
 
 const isMac = process.platform === 'darwin'
 const year = new Date().getFullYear()
@@ -32,8 +34,8 @@ const createSubmenu = (
       {
         label: 'Preferences',
         accelerator: 'CommandOrControl+,',
-        click () {
-          context.webContents.send('menu:preferences')
+        click() {
+          context.webContents.send(IPC_CHANNELS.menuPreferences)
         }
       },
       {
@@ -76,7 +78,7 @@ export const createMenu = (
     submenu: [
       {
         label: 'Open Images',
-        async click () {
+        async click() {
           const { filePaths } = await dialog.showOpenDialog({
             properties: ['openFile', 'openDirectory', 'multiSelections']
           })
@@ -84,7 +86,7 @@ export const createMenu = (
           if (filePaths.length) {
             const files = getFilesOrDirs(filePaths)
             const optimizer = new ImageOptimizer(files, context)
-            context.webContents.send('drop-from-dialog')
+            context.webContents.send(IPC_CHANNELS.dropFromDialog)
             optimizer.start()
           }
         },
@@ -98,14 +100,23 @@ export const createMenu = (
     role: 'help',
     submenu: [
       {
+        label: 'Check for Updates',
+        click() {
+          void checkForUpdates()
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
         label: 'View in GitHub',
-        click () {
+        click() {
           shell.openExternal('https://github.com/antonreshetov/image-optimizer')
         }
       },
       {
         label: 'Report Issue',
-        click () {
+        click() {
           shell.openExternal(
             'https://github.com/antonreshetov/image-optimizer/issues/new'
           )
@@ -116,19 +127,19 @@ export const createMenu = (
         submenu: [
           {
             label: 'PayPal',
-            click () {
+            click() {
               shell.openExternal('https://paypal.me/antonreshetov')
             }
           },
           {
             label: 'Patreon',
-            click () {
+            click() {
               shell.openExternal('https://patreon.com/antonreshetov')
             }
           },
           {
             label: 'Ko-Fi',
-            click () {
+            click() {
               shell.openExternal('https://ko-fi.com/antonreshetov')
             }
           }
@@ -136,7 +147,7 @@ export const createMenu = (
       },
       {
         label: 'About',
-        click () {
+        click() {
           dialog.showMessageBox(BrowserWindow.getFocusedWindow()!, {
             title: 'Image Optimizer',
             message: 'Image Optimizer',

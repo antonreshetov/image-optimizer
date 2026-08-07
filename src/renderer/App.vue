@@ -6,21 +6,20 @@
   <footer>
     <AppFooter />
   </footer>
-  <canvas
-    ref="canvas"
-    class="confetti"
-  />
+  <canvas ref="canvas" class="confetti" />
 </template>
 
 <script setup lang="ts">
-import { useStore } from '@/store'
+import { useOptimizationState } from '@/composables/useOptimizationState'
+import { useSettings } from '@/composables/useSettings'
 import type { CreateTypes } from 'canvas-confetti'
 import confetti from 'canvas-confetti'
-import { ipc } from '@/electron'
-import { onMounted, ref } from 'vue'
+import { electron } from '@/electron'
+import { onMounted, onUnmounted, ref } from 'vue'
 import router from '@/router'
 
-const store = useStore()
+const { setFileListVisible } = useOptimizationState()
+const { settings } = useSettings()
 const canvas = ref<HTMLCanvasElement>()
 let confettiInstance: CreateTypes
 
@@ -39,17 +38,23 @@ const runConfetti = () => {
   })
 }
 
-ipc.on('optimization-complete', () => {
-  if (store.settings.animationOnCompletion) {
+const unsubscribeOptimizationComplete = electron.onOptimizationComplete(() => {
+  if (settings.animationOnCompletion) {
     runConfetti()
   }
 })
-ipc.on('menu:preferences', () => {
+const unsubscribeMenuPreferences = electron.onMenuPreferences(() => {
   router.push('/settings')
 })
 
-ipc.on('drop-from-dialog', () => {
-  store.showFileList = true
+const unsubscribeDropFromDialog = electron.onDropFromDialog(() => {
+  setFileListVisible(true)
+})
+
+onUnmounted(() => {
+  unsubscribeOptimizationComplete()
+  unsubscribeMenuPreferences()
+  unsubscribeDropFromDialog()
 })
 </script>
 
