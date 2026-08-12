@@ -1,35 +1,46 @@
 <template>
-  <div class="footer-status">
-    <button v-if="updateStatus.state === 'available'" @click="downloadUpdate">
-      Download {{ updateStatus.version }}
-    </button>
-    <span v-else-if="updateStatus.state === 'downloading'">
-      Downloading {{ updateStatus.percent }}%
+  <div v-if="isVisible" class="update-control" aria-live="polite">
+    <Button
+      v-if="updateStatus.state === 'available'"
+      variant="ghost"
+      size="icon-sm"
+      :title="`Download update ${updateStatus.version}`"
+      :aria-label="`Download update ${updateStatus.version}`"
+      @click="downloadUpdate"
+    >
+      <Download />
+    </Button>
+    <span
+      v-else-if="updateStatus.state === 'downloading'"
+      class="update-control__progress"
+      :title="`Downloading update: ${updateStatus.percent}%`"
+    >
+      {{ updateStatus.percent }}%
     </span>
-    <button
+    <Button
       v-else-if="updateStatus.state === 'downloaded'"
+      variant="ghost"
+      size="icon-sm"
+      :title="`Restart to install update ${updateStatus.version}`"
+      :aria-label="`Restart to install update ${updateStatus.version}`"
       @click="installUpdate"
     >
-      Restart to update
-    </button>
-    <span v-else-if="updateStatus.state === 'checking'"
-      >Checking for updates…</span
-    >
-    <span
-      v-else-if="updateStatus.state === 'error'"
-      :title="updateStatus.message"
-    >
-      Update check failed
-    </span>
+      <RotateCw />
+    </Button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { Button } from '@/components/ui/button'
 import { electron } from '@/electron'
+import { Download, RotateCw } from '@lucide/vue'
 import type { UpdateStatus } from '../../shared/ipc'
-import { onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 
 const updateStatus = ref<UpdateStatus>({ state: 'idle' })
+const isVisible = computed(() =>
+  ['available', 'downloading', 'downloaded'].includes(updateStatus.value.state)
+)
 const downloadUpdate = () => void electron.downloadUpdate()
 const installUpdate = () => void electron.installUpdate()
 const unsubscribe = electron.onUpdateStatus(
@@ -40,15 +51,24 @@ onUnmounted(unsubscribe)
 </script>
 
 <style scoped>
-.footer-status {
-  color: var(--color-text-muted);
-  font-size: 10px;
+.update-control {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  pointer-events: auto;
 }
-.footer-status button {
-  background: transparent;
-  border: 0;
+.update-control__progress {
+  align-items: center;
+  background: var(--color-accent);
+  border-radius: var(--radius-md);
   color: var(--color-primary);
-  height: auto;
-  padding: 0;
+  display: inline-flex;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  height: 28px;
+  justify-content: center;
+  min-width: 38px;
+  padding: 0 7px;
 }
 </style>
