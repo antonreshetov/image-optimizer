@@ -1,5 +1,6 @@
 import path from 'node:path'
 import type { DroppedFile, SettingUpdate } from '../shared/ipc'
+import { isSafeOutputDirectoryName } from './utils'
 
 const SUPPORTED_TYPES = new Set([
   '',
@@ -14,13 +15,13 @@ const BOOLEAN_SETTINGS = new Set([
   'addMinSuffix',
   'clearResultList',
   'animationOnCompletion',
-  'convertToWebp'
+  'convertToWebp',
+  'stripMetadata'
 ])
 
 const NUMBER_SETTING_RANGES: Record<string, readonly [number, number]> = {
   'mozjpeg.quality': [0, 100],
-  'pngquant.qualityMin': [0, 99],
-  'pngquant.qualityMax': [0, 100]
+  pngQuality: [0, 100]
 }
 
 export const isValidDroppedFiles = (value: unknown): value is DroppedFile[] => {
@@ -52,6 +53,12 @@ export const isValidSettingUpdate = (
   const update = value as Record<string, unknown>
 
   if (typeof update.key !== 'string') return false
+  if (update.key === 'outputDirectoryName') {
+    return (
+      typeof update.value === 'string' &&
+      isSafeOutputDirectoryName(update.value)
+    )
+  }
   if (BOOLEAN_SETTINGS.has(update.key)) return typeof update.value === 'boolean'
 
   const range = NUMBER_SETTING_RANGES[update.key]

@@ -3,7 +3,6 @@ import { app, dialog, shell, BrowserWindow } from 'electron'
 import { version, author } from '../../package.json'
 import os from 'os'
 import { getFilesOrDirs } from './utils'
-import { ImageOptimizer } from './image-compressor'
 import { IPC_CHANNELS } from '../shared/ipc'
 import { checkForUpdates } from './updater'
 
@@ -32,10 +31,16 @@ const createSubmenu = (
         type: 'separator'
       },
       {
-        label: 'Preferences',
+        label: 'Preferences…',
         accelerator: 'CommandOrControl+,',
         click() {
           context.webContents.send(IPC_CHANNELS.menuPreferences)
+        }
+      },
+      {
+        label: 'Toggle Inspector',
+        click() {
+          context.webContents.send(IPC_CHANNELS.menuToggleInspector)
         }
       },
       {
@@ -85,9 +90,7 @@ export const createMenu = (
           console.log(filePaths)
           if (filePaths.length) {
             const files = getFilesOrDirs(filePaths)
-            const optimizer = new ImageOptimizer(files, context)
-            context.webContents.send(IPC_CHANNELS.dropFromDialog)
-            optimizer.start()
+            context.webContents.send(IPC_CHANNELS.dropFromDialog, files)
           }
         },
         accelerator: 'CommandOrControl+O'

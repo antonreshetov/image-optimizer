@@ -28,6 +28,10 @@ describe('IPC validation', () => {
     expect(isValidSettingUpdate({ key: 'mozjpeg.quality', value: 75 })).toBe(
       true
     )
+    expect(isValidSettingUpdate({ key: 'pngQuality', value: 75 })).toBe(true)
+    expect(
+      isValidSettingUpdate({ key: 'pngquant.qualityMax', value: 85 })
+    ).toBe(false)
     expect(isValidSettingUpdate({ key: 'bounds', value: {} })).toBe(false)
     expect(isValidSettingUpdate({ key: 'mozjpeg.quality', value: 101 })).toBe(
       false
@@ -35,6 +39,14 @@ describe('IPC validation', () => {
     expect(isValidSettingUpdate({ key: 'convertToWebp', value: 'yes' })).toBe(
       false
     )
+    expect(
+      isValidSettingUpdate({ key: 'outputDirectoryName', value: 'Optimized' })
+    ).toBe(true)
+    for (const value of ['../escape', 'CON', 'folder.', ' spaced ']) {
+      expect(isValidSettingUpdate({ key: 'outputDirectoryName', value })).toBe(
+        false
+      )
+    }
   })
 
   it('allows only HTTPS URLs within the project GitHub repository', () => {

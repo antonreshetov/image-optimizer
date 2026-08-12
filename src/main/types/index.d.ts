@@ -8,9 +8,8 @@ export interface StoreSchema {
   mozjpeg: {
     quality: number
   }
-  pngquant: {
-    qualityMin: number
-    qualityMax: number
-  }
+  pngQuality: number
   convertToWebp: boolean
+  stripMetadata: boolean
+  outputDirectoryName: string
 }

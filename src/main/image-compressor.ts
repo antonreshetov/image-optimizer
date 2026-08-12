@@ -1,4 +1,9 @@
-import { isFile, isFolder, getFileSize } from './utils'
+import {
+  isFile,
+  isFolder,
+  getFileSize,
+  getSafeOutputDirectoryName
+} from './utils'
 import {
   ensureDirSync,
   readFile,
@@ -18,6 +23,7 @@ import mime from 'mime-types'
 import queue from 'queue'
 import path from 'path'
 import util from 'util'
+import { allowPreviewPaths } from './preview-access'
 import { store } from '../main/store'
 import type { BrowserWindow } from 'electron'
 import {
@@ -30,10 +36,10 @@ import {
   isGeneratedOutputDirectory,
   runSettledJob
 } from './optimization-policy'
+import { getPngquantQualityRange } from './png-quality'
 
 const readdirAsync = util.promisify(readdir)
 
-const MIN_FOLDER = 'minified'
 const MIN_SUFFIX = '.min'
 const MIME_TYPE_ENUM = {
   jpg: 'image/jpeg',
@@ -94,7 +100,9 @@ export class ImageOptimizer {
 
       if (isFile(file.path)) {
         let { name, ext, dir } = path.parse(file.path)
-        const isAddToSubfolder = store.app.get('addToSubfolder')
+        const outputDirectoryName = getSafeOutputDirectoryName(
+          store.app.get('outputDirectoryName')
+        )
         const convertToWebp = store.app.get('convertToWebp')
         const availableExtToWebp = ['.png', '.jpg', '.jpeg']
 
@@ -106,18 +114,23 @@ export class ImageOptimizer {
           ? `${name}${MIN_SUFFIX}${ext}`
           : `${name}${ext}`
 
-        const output = isAddToSubfolder
-          ? `${dir}/${MIN_FOLDER}/${fileName}`
-          : `${dir}/${fileName}`
-
-        if (isAddToSubfolder) {
-          ensureDirSync(`${dir}/${MIN_FOLDER}`)
-        }
+        const outputDirectory = store.app.get('addToSubfolder')
+          ? path.join(dir, outputDirectoryName)
+          : dir
+        const output = path.join(outputDirectory, fileName)
+        ensureDirSync(outputDirectory)
 
         this.#queue.push(() =>
           runSettledJob(
             () => this.#processFile(file, output),
-            (error) => console.error(error)
+            (error) => {
+              console.error(error)
+              this.#context.webContents.send(IPC_CHANNELS.fileFailed, {
+                path: file.path,
+                message:
+                  error instanceof Error ? error.message : 'Optimization failed'
+              })
+            }
           )
         )
       }
@@ -132,7 +145,11 @@ export class ImageOptimizer {
           const directory = isFolder(filePath)
           if (
             directory &&
-            isGeneratedOutputDirectory(file, store.app.get('addToSubfolder'))
+            isGeneratedOutputDirectory(
+              file,
+              store.app.get('addToSubfolder'),
+              getSafeOutputDirectoryName(store.app.get('outputDirectoryName'))
+            )
           ) {
             return
           }
@@ -163,21 +180,32 @@ export class ImageOptimizer {
       const complete = () => {
         try {
           const compressedSize = getFileSize(output)
-          this.#sendToRenderer(file, originalSize, compressedSize)
+          allowPreviewPaths(file.path, output)
+          this.#sendToRenderer(file, output, originalSize, compressedSize)
           resolve()
         } catch (error) {
           fail(error)
         }
       }
       const toWebp = () => {
-        execFile(cwebp, [file.path, '-o', output], (err: any) => {
-          if (err) {
-            fail(err)
-            return
-          }
+        execFile(
+          cwebp,
+          [
+            '-metadata',
+            store.app.get('stripMetadata') ? 'none' : 'all',
+            file.path,
+            '-o',
+            output
+          ],
+          (err: any) => {
+            if (err) {
+              fail(err)
+              return
+            }
 
-          complete()
-        })
+            complete()
+          }
+        )
       }
 
       switch (file.type) {
@@ -226,7 +254,7 @@ export class ImageOptimizer {
         }
 
         case MIME_TYPE_ENUM.png: {
-          const { qualityMin, qualityMax } = store.app.get('pngquant')
+          const quality = store.app.get('pngQuality')
           const convertToWebp = store.app.get('convertToWebp')
 
           if (convertToWebp) {
@@ -236,7 +264,8 @@ export class ImageOptimizer {
               pngquant,
               [
                 '--quality',
-                `${qualityMin}-${qualityMax}`,
+                getPngquantQualityRange(quality),
+                ...(store.app.get('stripMetadata') ? ['--strip'] : []),
                 '-fo',
                 output,
                 file.path
@@ -291,12 +320,14 @@ export class ImageOptimizer {
 
   #formatOutputData(
     file: DroppedFile,
+    outputPath: string,
     originalSize: FileSize,
     compressedSize: FileSize
   ): FileOutput {
     return {
       name: file.name,
       path: file.path,
+      outputPath,
       originalSize,
       compressedSize,
       compressionPercentage: Number(
@@ -309,12 +340,13 @@ export class ImageOptimizer {
 
   #sendToRenderer(
     file: DroppedFile,
+    outputPath: string,
     originalSize: FileSize,
     compressedSize: FileSize
   ) {
     this.#context.webContents.send(
       IPC_CHANNELS.fileComplete,
-      this.#formatOutputData(file, originalSize, compressedSize)
+      this.#formatOutputData(file, outputPath, originalSize, compressedSize)
     )
   }
 }

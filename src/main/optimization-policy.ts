@@ -11,5 +11,6 @@ export const runSettledJob = async (
 
 export const isGeneratedOutputDirectory = (
   name: string,
-  addToSubfolder: boolean
-) => addToSubfolder && name === 'minified'
+  addToSubfolder: boolean,
+  outputDirectoryName = 'minified'
+) => addToSubfolder && (name === outputDirectoryName || name === 'minified')

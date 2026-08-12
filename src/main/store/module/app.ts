@@ -1,7 +1,14 @@
 import Store from 'electron-store'
 import type { StoreSchema } from '../../types'
+import { DEFAULT_PNG_QUALITY, resolvePngQuality } from '../../png-quality'
 
-export default new Store<StoreSchema>({
+interface LegacyStoreSchema {
+  pngquant?: {
+    qualityMax?: number
+  }
+}
+
+const appStore = new Store<StoreSchema>({
   name: 'app',
   watch: true,
 
@@ -40,23 +47,37 @@ export default new Store<StoreSchema>({
       },
       default: {}
     },
-    pngquant: {
-      type: 'object',
-      properties: {
-        qualityMin: {
-          type: 'number',
-          default: 75
-        },
-        qualityMax: {
-          type: 'number',
-          default: 85
-        }
-      },
-      default: {}
+    pngQuality: {
+      type: 'number',
+      minimum: 0,
+      maximum: 100
     },
     convertToWebp: {
       type: 'boolean',
       default: false
+    },
+    stripMetadata: {
+      type: 'boolean',
+      default: true
+    },
+    outputDirectoryName: {
+      type: 'string',
+      minLength: 1,
+      maxLength: 80,
+      default: 'minified'
     }
   }
 })
+
+if (!appStore.has('pngQuality')) {
+  const legacyStore = appStore.store as StoreSchema & LegacyStoreSchema
+  appStore.set(
+    'pngQuality',
+    resolvePngQuality(
+      undefined,
+      legacyStore.pngquant?.qualityMax ?? DEFAULT_PNG_QUALITY
+    )
+  )
+}
+
+export default appStore

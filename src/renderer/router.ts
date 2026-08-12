@@ -11,8 +11,11 @@ const router = createRouter({
     },
     {
       path: '/settings',
-      meta: { title: 'Test page' },
       component: () => import('./views/Settings.vue')
+    },
+    {
+      path: '/comparison',
+      component: () => import('./views/Comparison.vue')
     }
   ]
 })

@@ -4,19 +4,26 @@ import type { AppSettings, SettingUpdate } from '../../shared/ipc'
 
 const settings = reactive<AppSettings>({
   mozjpeg: { quality: 75 },
-  pngquant: { qualityMax: 85, qualityMin: 75 },
+  pngQuality: 75,
   convertToWebp: false,
   addMinSuffix: false,
   addToSubfolder: true,
   clearResultList: false,
-  animationOnCompletion: true
+  animationOnCompletion: true,
+  stripMetadata: true,
+  outputDirectoryName: 'minified'
 })
 
 const readonlySettings = readonly(settings)
 
-const settingsReady = electron.getSettings().then((snapshot) => {
-  Object.assign(settings, snapshot)
-})
+let settingsReady: Promise<void> | undefined
+
+const ensureSettings = () => {
+  settingsReady ??= electron.getSettings().then((snapshot) => {
+    Object.assign(settings, snapshot)
+  })
+  return settingsReady
+}
 
 const persist = async (update: SettingUpdate) => {
   try {
@@ -36,20 +43,10 @@ const setJpegQuality = (quality: number) => {
   persist({ key: 'mozjpeg.quality', value })
 }
 
-const setPngQualityMin = (quality: number) => {
-  const value = getQualityNumber(0, 99, Number(quality))
-  settings.pngquant.qualityMin = value
-  if (settings.pngquant.qualityMin < settings.pngquant.qualityMax) {
-    persist({ key: 'pngquant.qualityMin', value })
-  }
-}
-
-const setPngQualityMax = (quality: number) => {
+const setPngQuality = (quality: number) => {
   const value = getQualityNumber(0, 100, Number(quality))
-  settings.pngquant.qualityMax = value
-  if (settings.pngquant.qualityMin < settings.pngquant.qualityMax) {
-    persist({ key: 'pngquant.qualityMax', value })
-  }
+  settings.pngQuality = value
+  persist({ key: 'pngQuality', value })
 }
 
 const setConvertToWebp = (value: boolean) => {
@@ -77,15 +74,28 @@ const setAnimationOnCompletion = (value: boolean) => {
   persist({ key: 'animationOnCompletion', value })
 }
 
+const setStripMetadata = (value: boolean) => {
+  settings.stripMetadata = value
+  persist({ key: 'stripMetadata', value })
+}
+
+const setOutputDirectoryName = (value: string) => {
+  const normalized = value.trim().slice(0, 80)
+  if (!normalized || /[\\/:]/.test(normalized)) return
+  settings.outputDirectoryName = normalized
+  persist({ key: 'outputDirectoryName', value: normalized })
+}
+
 export const useSettings = () => ({
   settings: readonlySettings,
-  settingsReady,
+  settingsReady: ensureSettings(),
   setJpegQuality,
-  setPngQualityMin,
-  setPngQualityMax,
+  setPngQuality,
   setConvertToWebp,
   setAddMinSuffix,
   setAddToSubfolder,
   setClearResultList,
-  setAnimationOnCompletion
+  setAnimationOnCompletion,
+  setStripMetadata,
+  setOutputDirectoryName
 })

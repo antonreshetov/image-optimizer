@@ -21,5 +21,8 @@ describe('optimization policy', () => {
     expect(isGeneratedOutputDirectory('minified', true)).toBe(true)
     expect(isGeneratedOutputDirectory('minified', false)).toBe(false)
     expect(isGeneratedOutputDirectory('photos', true)).toBe(false)
+    expect(isGeneratedOutputDirectory('Optimized', true, 'Optimized')).toBe(
+      true
+    )
   })
 })

@@ -15,7 +15,7 @@
     "paths": {
       "@/*": ["./src/renderer/*"]
     },
-    "types": ["unplugin-icons/types/vue"]
+    "types": ["unplugin-icons/types/vue", "web-bluetooth"]
   },
   "include": [
     "src/renderer/**/*.ts",

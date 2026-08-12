@@ -1,6 +1,7 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import { FileSystemIconLoader } from 'unplugin-icons/loaders'
 import Icons from 'unplugin-icons/vite'
@@ -31,6 +32,7 @@ export default defineConfig({
   },
   plugins: [
     vue(),
+    tailwindcss(),
     Components({
       dts: path.resolve(rendererRoot, 'types/components.d.ts'),
       dirs: [path.resolve(rendererRoot, 'components')],
