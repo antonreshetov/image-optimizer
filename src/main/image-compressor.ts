@@ -1,4 +1,9 @@
-import { isFile, isFolder, getFileSize } from './utils'
+import {
+  isFile,
+  isFolder,
+  getFileSize,
+  getSafeOutputDirectoryName
+} from './utils'
 import {
   ensureDirSync,
   readFile,
@@ -18,14 +23,23 @@ import mime from 'mime-types'
 import queue from 'queue'
 import path from 'path'
 import util from 'util'
+import { allowPreviewPaths } from './preview-access'
 import { store } from '../main/store'
 import type { BrowserWindow } from 'electron'
-import type { DroppedFile } from '../renderer/types'
-import type { FileOutput, FileSize } from './types'
+import {
+  IPC_CHANNELS,
+  type DroppedFile,
+  type FileOutput,
+  type FileSize
+} from '../shared/ipc'
+import {
+  isGeneratedOutputDirectory,
+  runSettledJob
+} from './optimization-policy'
+import { getPngquantQualityRange } from './png-quality'
 
 const readdirAsync = util.promisify(readdir)
 
-const MIN_FOLDER = 'minified'
 const MIN_SUFFIX = '.min'
 const MIME_TYPE_ENUM = {
   jpg: 'image/jpeg',
@@ -40,37 +54,55 @@ export class ImageOptimizer {
   #context
   files: DroppedFile[]
 
-  constructor (files: DroppedFile[] = [], context: BrowserWindow) {
-    this.#queue = queue({ results: [], concurrency: 10 })
+  constructor(files: DroppedFile[] = [], context: BrowserWindow) {
+    const concurrency = Math.max(1, Math.min(64, store.app.get('concurrency')))
+    this.#queue = queue({ results: [], concurrency })
     this.#context = context
 
     this.files = files
   }
 
-  start () {
+  start() {
     const timeStart = new Date()
 
-    this.#context.webContents.send('optimization-start')
+    this.#context.webContents.send(IPC_CHANNELS.optimizationStart)
+    void this.#startQueue(timeStart)
+  }
 
-    this.#optimize(this.files)
-    this.#queue.on('end', () => {
-      const timeEnd = new Date()
-      const timeSpent = `${(timeEnd.valueOf() - timeStart.valueOf()) / 1000}s`
+  async #startQueue(timeStart: Date) {
+    try {
+      await this.#enqueue(this.files)
+    } catch (error) {
+      console.error(error)
+      this.#finish(timeStart)
+      return
+    }
 
-      this.#context.webContents.send('optimization-complete')
-      this.#context.webContents.send('job-time', timeSpent)
+    this.#queue.start((error) => {
+      if (error) console.error(error)
+      this.#finish(timeStart)
     })
   }
 
-  #optimize (files: DroppedFile[]) {
-    files.forEach(async file => {
+  #finish(timeStart: Date) {
+    const timeEnd = new Date()
+    const timeSpent = `${(timeEnd.valueOf() - timeStart.valueOf()) / 1000}s`
+
+    this.#context.webContents.send(IPC_CHANNELS.optimizationComplete)
+    this.#context.webContents.send(IPC_CHANNELS.jobTime, timeSpent)
+  }
+
+  async #enqueue(files: DroppedFile[]) {
+    for (const file of files) {
       if (!Object.values(MIME_TYPE_ENUM).includes(file.type)) {
-        return
+        continue
       }
 
       if (isFile(file.path)) {
         let { name, ext, dir } = path.parse(file.path)
-        const isAddToSubfolder = store.app.get('addToSubfolder')
+        const outputDirectoryName = getSafeOutputDirectoryName(
+          store.app.get('outputDirectoryName')
+        )
         const convertToWebp = store.app.get('convertToWebp')
         const availableExtToWebp = ['.png', '.jpg', '.jpeg']
 
@@ -82,15 +114,25 @@ export class ImageOptimizer {
           ? `${name}${MIN_SUFFIX}${ext}`
           : `${name}${ext}`
 
-        const output = isAddToSubfolder
-          ? `${dir}/${MIN_FOLDER}/${fileName}`
-          : `${dir}/${fileName}`
+        const outputDirectory = store.app.get('addToSubfolder')
+          ? path.join(dir, outputDirectoryName)
+          : dir
+        const output = path.join(outputDirectory, fileName)
+        ensureDirSync(outputDirectory)
 
-        if (isAddToSubfolder) {
-          ensureDirSync(`${dir}/${MIN_FOLDER}`)
-        }
-
-        this.#queue.push(() => this.#processFile(file, output))
+        this.#queue.push(() =>
+          runSettledJob(
+            () => this.#processFile(file, output),
+            (error) => {
+              console.error(error)
+              this.#context.webContents.send(IPC_CHANNELS.fileFailed, {
+                path: file.path,
+                message:
+                  error instanceof Error ? error.message : 'Optimization failed'
+              })
+            }
+          )
+        )
       }
 
       if (isFolder(file.path)) {
@@ -98,50 +140,84 @@ export class ImageOptimizer {
         const files = (await readdirAsync(file.path)) as string[]
         const _files: DroppedFile[] = []
 
-        files.filter(junk.not).forEach(file => {
-          if (isFolder(`${folderPath}/${file}`)) return
+        files.filter(junk.not).forEach((file) => {
+          const filePath = path.join(folderPath, file)
+          const directory = isFolder(filePath)
+          if (
+            directory &&
+            isGeneratedOutputDirectory(
+              file,
+              store.app.get('addToSubfolder'),
+              getSafeOutputDirectoryName(store.app.get('outputDirectoryName'))
+            )
+          ) {
+            return
+          }
+          const type = directory ? '' : mime.lookup(file) || ''
 
           _files.push({
             name: file,
-            path: `${folderPath}/${file}`,
-            type: mime.lookup(file) as string
+            path: filePath,
+            type
           })
         })
 
         if (_files.length) {
-          this.#optimize(_files)
+          await this.#enqueue(_files)
         }
       }
-    })
-
-    this.#queue.start()
+    }
   }
 
   #processFile = (file: DroppedFile, output: string) => {
     const originalSize = getFileSize(file.path)
 
     return new Promise<void>((resolve, reject) => {
-      const toWebp = () => {
-        execFile(cwebp, [file.path, '-o', output], (err: any) => {
-          if (err) {
-            console.log(err)
-            reject(err)
-          }
-
+      const fail = (error: unknown) => {
+        console.error(error)
+        reject(error)
+      }
+      const complete = () => {
+        try {
           const compressedSize = getFileSize(output)
-          this.#sendToRenderer(file, originalSize, compressedSize)
+          allowPreviewPaths(file.path, output)
+          this.#sendToRenderer(file, output, originalSize, compressedSize)
           resolve()
-        })
+        } catch (error) {
+          fail(error)
+        }
+      }
+      const toWebp = () => {
+        execFile(
+          cwebp,
+          [
+            '-metadata',
+            store.app.get('stripMetadata') ? 'none' : 'all',
+            file.path,
+            '-o',
+            output
+          ],
+          (err: any) => {
+            if (err) {
+              fail(err)
+              return
+            }
+
+            complete()
+          }
+        )
       }
 
       switch (file.type) {
         case MIME_TYPE_ENUM.jpg: {
           const { quality } = store.app.get('mozjpeg')
+          const convertToWebp = store.app.get('convertToWebp')
 
           let originalFile: string
           const isAddTempFile =
-            !store.app.get('addToSubfolder') && !store.app.get('addMinSuffix')
-          const convertToWebp = store.app.get('convertToWebp')
+            !convertToWebp &&
+            !store.app.get('addToSubfolder') &&
+            !store.app.get('addMinSuffix')
 
           if (isAddTempFile) {
             originalFile = output + '.tmp'
@@ -156,24 +232,29 @@ export class ImageOptimizer {
             execFile(
               mozjpeg,
               ['-quality', `${quality}`, '-outfile', output, originalFile],
-              err => {
+              (err) => {
+                if (isAddTempFile) {
+                  try {
+                    unlinkSync(originalFile)
+                  } catch (error) {
+                    fail(error)
+                    return
+                  }
+                }
                 if (err) {
-                  console.log(err)
-                  reject(err)
+                  fail(err)
+                  return
                 }
 
-                const compressedSize = getFileSize(output)
-                this.#sendToRenderer(file, originalSize, compressedSize)
-                resolve()
+                complete()
               }
             )
           }
-          if (isAddTempFile) unlinkSync(originalFile)
           break
         }
 
         case MIME_TYPE_ENUM.png: {
-          const { qualityMin, qualityMax } = store.app.get('pngquant')
+          const quality = store.app.get('pngQuality')
           const convertToWebp = store.app.get('convertToWebp')
 
           if (convertToWebp) {
@@ -183,20 +264,19 @@ export class ImageOptimizer {
               pngquant,
               [
                 '--quality',
-                `${qualityMin}-${qualityMax}`,
+                getPngquantQualityRange(quality),
+                ...(store.app.get('stripMetadata') ? ['--strip'] : []),
                 '-fo',
                 output,
                 file.path
               ],
-              err => {
+              (err) => {
                 if (err) {
-                  console.log(err)
-                  reject(err)
+                  fail(err)
+                  return
                 }
 
-                const compressedSize = getFileSize(output)
-                this.#sendToRenderer(file, originalSize, compressedSize)
-                resolve()
+                complete()
               }
             )
           }
@@ -204,15 +284,13 @@ export class ImageOptimizer {
         }
 
         case MIME_TYPE_ENUM.gif: {
-          execFile(gifsicle, ['-o', output, file.path], err => {
+          execFile(gifsicle, ['-o', output, file.path], (err) => {
             if (err) {
-              console.log(err)
-              reject(err)
+              fail(err)
+              return
             }
 
-            const compressedSize = getFileSize(output)
-            this.#sendToRenderer(file, originalSize, compressedSize)
-            resolve()
+            complete()
           })
           break
         }
@@ -220,17 +298,18 @@ export class ImageOptimizer {
         case MIME_TYPE_ENUM.svg: {
           readFile(file.path, (err, buffer) => {
             if (err) {
-              console.log(err)
-              reject(err)
+              fail(err)
+              return
             }
 
-            const { data } = svg.optimize(buffer)
-            writeFile(output, data, err => {
-              if (err) console.log(err)
+            const { data } = svg.optimize(buffer.toString())
+            writeFile(output, data, (err) => {
+              if (err) {
+                fail(err)
+                return
+              }
 
-              const compressedSize = getFileSize(output)
-              this.#sendToRenderer(file, originalSize, compressedSize)
-              resolve()
+              complete()
             })
           })
           break
@@ -239,14 +318,16 @@ export class ImageOptimizer {
     })
   }
 
-  #formatOutputData (
+  #formatOutputData(
     file: DroppedFile,
+    outputPath: string,
     originalSize: FileSize,
     compressedSize: FileSize
   ): FileOutput {
     return {
       name: file.name,
       path: file.path,
+      outputPath,
       originalSize,
       compressedSize,
       compressionPercentage: Number(
@@ -257,14 +338,15 @@ export class ImageOptimizer {
     }
   }
 
-  #sendToRenderer (
+  #sendToRenderer(
     file: DroppedFile,
+    outputPath: string,
     originalSize: FileSize,
     compressedSize: FileSize
   ) {
     this.#context.webContents.send(
-      'file-complete',
-      this.#formatOutputData(file, originalSize, compressedSize)
+      IPC_CHANNELS.fileComplete,
+      this.#formatOutputData(file, outputPath, originalSize, compressedSize)
     )
   }
 }

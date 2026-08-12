@@ -7,10 +7,7 @@
       <div class="field__body">
         <slot />
       </div>
-      <div
-        v-if="desc"
-        class="field__desc"
-      >
+      <div v-if="desc" class="field__desc">
         <span>{{ desc }}</span>
       </div>
     </div>

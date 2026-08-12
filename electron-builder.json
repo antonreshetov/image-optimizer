@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json.schemastore.org/electron-builder",
+  "productName": "Image Optimizer",
+  "appId": "com.antonreshetov.image-optimizer",
+  "artifactName": "image-optimizer-${version}-${os}-${arch}.${ext}",
+  "directories": {
+    "output": "dist",
+    "buildResources": "build/icons"
+  },
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "antonreshetov",
+      "repo": "image-optimizer"
+    }
+  ],
+  "files": [
+    "build/main/**/*",
+    "build/renderer/**/*",
+    "build/shared/**/*",
+    "build/icons/**/*",
+    "package.json",
+    "!**/*.map"
+  ],
+  "fileAssociations": [
+    { "name": "JPG", "ext": "jpg" },
+    { "name": "PNG", "ext": "png" },
+    { "name": "GIF", "ext": "gif" },
+    { "name": "SVG", "ext": "svg" }
+  ],
+  "mac": {
+    "target": [
+      { "target": "dmg", "arch": ["arm64", "x64"] },
+      { "target": "zip", "arch": ["arm64", "x64"] }
+    ],
+    "icon": "build/icons/icon.icns",
+    "hardenedRuntime": true,
+    "entitlements": "build/entitlements.mac.plist",
+    "entitlementsInherit": "build/entitlements.mac.plist",
+    "notarize": true
+  },
+  "win": {
+    "target": "nsis",
+    "icon": "build/icons/icon.ico"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "shortcutName": "Image Optimizer"
+  },
+  "linux": {
+    "target": ["snap"],
+    "icon": "build/icons"
+  }
+}

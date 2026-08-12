@@ -2,7 +2,12 @@ node_modules
 dist
 build/*
 !build/icons
+!build/entitlements.mac.plist
 src/renderer/types/components.d.ts
+coverage
+.eslintcache
+.vite
+*.tsbuildinfo
 
 .vscode
 .idea

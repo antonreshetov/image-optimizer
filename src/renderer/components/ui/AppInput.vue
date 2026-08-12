@@ -1,23 +1,16 @@
 <template>
-  <div
-    class="app-input"
-    :class="{ 'is-error': !valid }"
-  >
-    <input
-      v-model="value"
-      :value="value"
-      :type="type"
-      v-bind="$attrs"
-    >
+  <div class="app-input" :class="{ 'is-error': !valid }">
+    <input v-model="value" :value="value" :type="type" v-bind="$attrs" />
   </div>
 </template>
 
-<script setup lang="ts">import { computed } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
 
 interface Props {
   modelValue: string | number
-  type: 'text' | 'number'
-  valid: boolean
+  type?: 'text' | 'number'
+  valid?: boolean
 }
 
 interface Emits {
@@ -33,7 +26,7 @@ const emit = defineEmits<Emits>()
 
 const value = computed({
   get: () => props.modelValue,
-  set: v => {
+  set: (v) => {
     emit('update:modelValue', v)
   }
 })

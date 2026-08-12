@@ -1,27 +1,20 @@
-import type { FileOutput, StoreSchema } from '../../main/types'
+import type { FileOutput, OptimizationInput } from '../../shared/ipc'
 
-export interface DroppedFile {
-  name: string
-  path: string
-  type: string
+export interface OptimizationItem extends OptimizationInput {
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  output?: FileOutput
+  error?: string
 }
 
-export interface AppState {
-  files: FileOutput[]
+export interface OptimizationState {
+  files: OptimizationItem[]
   totalFiles: {
     originalSize: number
     compressedSize: number
   }
   jobTime: string
   showFileList: boolean
-  settings: Pick<
-  StoreSchema,
-  | 'mozjpeg'
-  | 'pngquant'
-  | 'addMinSuffix'
-  | 'convertToWebp'
-  | 'clearResultList'
-  | 'addToSubfolder'
-  | 'animationOnCompletion'
-  >
+  isOptimizing: boolean
+  selectedPath: string | null
+  inspectorVisible: boolean
 }

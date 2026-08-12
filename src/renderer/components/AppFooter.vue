@@ -1,99 +1,54 @@
 <template>
-  <div class="footer">
-    <div class="actions">
-      <div
-        v-if="updateAvailable"
-        class="actions-item update"
-        @click="onUpdate"
-      >
-        <span>Update available</span>
-        <SvgArrowCircleUp />
-      </div>
-      <RouterLink
-        v-slot="{navigate}"
-        to="/settings"
-        custom
-      >
-        <div
-          v-if="showSettingsButton"
-          class="actions-item settings"
-          @click="navigate"
-        >
-          <SvgCog />
-        </div>
-      </RouterLink>
-      <RouterLink
-        v-slot="{navigate}"
-        to="/"
-        custom
-      >
-        <div
-          v-if="!showSettingsButton"
-          class="actions-item settings"
-          @click="navigate"
-        >
-          <SvgTimes />
-        </div>
-      </RouterLink>
-    </div>
+  <div class="footer-status">
+    <button v-if="updateStatus.state === 'available'" @click="downloadUpdate">
+      Download {{ updateStatus.version }}
+    </button>
+    <span v-else-if="updateStatus.state === 'downloading'">
+      Downloading {{ updateStatus.percent }}%
+    </span>
+    <button
+      v-else-if="updateStatus.state === 'downloaded'"
+      @click="installUpdate"
+    >
+      Restart to update
+    </button>
+    <span v-else-if="updateStatus.state === 'checking'"
+      >Checking for updates…</span
+    >
+    <span
+      v-else-if="updateStatus.state === 'error'"
+      :title="updateStatus.message"
+    >
+      Update check failed
+    </span>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ipc } from '@/electron'
-import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { electron } from '@/electron'
+import type { UpdateStatus } from '../../shared/ipc'
+import { onUnmounted, ref } from 'vue'
 
-const route = useRoute()
-
-const updateAvailable = ref(false)
-const showSettingsButton = computed(() => route.path === '/')
-
-const onUpdate = () => {
-  ipc.send(
-    'open-url',
-    'https://github.com/antonreshetov/image-optimizer/releases'
-  )
-}
-
-ipc.on('update-available', () => {
-  updateAvailable.value = true
-})
+const updateStatus = ref<UpdateStatus>({ state: 'idle' })
+const downloadUpdate = () => void electron.downloadUpdate()
+const installUpdate = () => void electron.installUpdate()
+const unsubscribe = electron.onUpdateStatus(
+  (status) => (updateStatus.value = status)
+)
+void electron.getUpdateStatus().then((status) => (updateStatus.value = status))
+onUnmounted(unsubscribe)
 </script>
 
-<style lang="scss" scoped>
-.footer {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  .actions {
-    display: flex;
-    gap: 6px;
-    &-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      span {
-        font-size: 10px;
-      }
-    }
-  }
-  .update {
-    cursor: pointer;
-    user-select: none;
-    svg {
-      fill: var(--color-green);
-      &:hover {
-        fill: var(--color-green);
-      }
-    }
-  }
-  svg {
-    fill: var(--color-gray-500);
-    &:hover {
-      fill: var(--color-gray-700);
-    }
-  }
+<style scoped>
+.footer-status {
+  color: var(--color-text-muted);
+  font-size: 10px;
+}
+.footer-status button {
+  background: transparent;
+  border: 0;
+  color: var(--color-primary);
+  height: auto;
+  padding: 0;
 }
 </style>

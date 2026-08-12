@@ -1,6 +1,6 @@
-import { createWebHistory, createRouter } from 'vue-router'
+import { createWebHashHistory, createRouter } from 'vue-router'
 
-const history = createWebHistory()
+const history = createWebHashHistory()
 const router = createRouter({
   linkActiveClass: 'active',
   history,
@@ -11,10 +11,12 @@ const router = createRouter({
     },
     {
       path: '/settings',
-      meta: { title: 'Test page' },
       component: () => import('./views/Settings.vue')
+    },
+    {
+      path: '/comparison',
+      component: () => import('./views/Comparison.vue')
     }
-
   ]
 })
 

@@ -1,150 +1,180 @@
 <template>
-  <div class="list">
-    <div class="list__header">
-      <div class="list__header-item">
-        <div class="label">
-          Original Size:
-        </div>
-        <h2>{{ total.originalSize }}</h2>
-      </div>
-      <div class="list__header-item">
-        <div class="label">
-          Optimized Size:
-        </div>
-        <h2>{{ total.compressedSize }}</h2>
-      </div>
-      <div class="list__header-item">
-        <div class="label">
-          Compression:
-        </div>
-        <h2>{{ total.compressionPercentage }} %</h2>
-      </div>
-      <div class="list__header-item">
-        <div class="label">
-          Current Job Time:
-        </div>
-        <h2>{{ store.jobTime }}</h2>
-      </div>
+  <div class="file-list">
+    <div class="file-list__header file-grid">
+      <span>Name</span>
+      <span>Original</span>
+      <span>Optimized</span>
+      <span>Saved</span>
+      <span>Status</span>
     </div>
-    <div class="list__body">
-      <table>
-        <thead>
-          <tr>
-            <th width="280">
-              Name
-            </th>
-            <th>Original Size</th>
-            <th>Optimized Size</th>
-            <th align="right">
-              Compression
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(i, index) in store.files"
-            :key="index"
-            :class="(index + 1) % 2 === 0 ? 'event' : 'odd'"
+    <ScrollArea v-if="state.files.length" class="file-list__body">
+      <div class="file-list__rows">
+        <button
+          v-for="file in state.files"
+          :key="file.path"
+          class="file-row file-grid"
+          :class="{ selected: file.path === state.selectedPath }"
+          type="button"
+          @click="selectFile(file.path)"
+          @contextmenu.prevent="openContextMenu(file.path)"
+        >
+          <span class="file-name">
+            <AppThumbnail :path="file.path" />
+            <span :title="file.path">{{ file.name }}</span>
+          </span>
+          <span>{{ file.originalSize.readable }}</span>
+          <span class="optimized">{{
+            file.output?.compressedSize.readable ?? '—'
+          }}</span>
+          <span>{{
+            file.output
+              ? `${Math.round(file.output.compressionPercentage)}%`
+              : '—'
+          }}</span>
+          <span
+            ><em :class="file.status" :title="file.error">{{
+              statusLabel(file.status)
+            }}</em></span
           >
-            <td>{{ i.name }}</td>
-            <td>{{ i.originalSize.readable }}</td>
-            <td>{{ i.compressedSize.readable }}</td>
-            <td align="right">
-              {{ i.compressionPercentage }} %
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        </button>
+      </div>
+    </ScrollArea>
+    <div v-else class="file-list__empty">
+      <span class="spinner" />
+      <strong>Optimizing images…</strong>
+      <small>Results will appear here as they finish.</small>
     </div>
-    <AppPreloader v-if="showPreloader" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ipc, store as electronStore } from '@/electron'
-import { computed, ref, onUnmounted } from 'vue'
-import type { FileOutput } from '../../main/types'
-import { formatBytes } from '../../main/utils'
-import { useStore } from '@/store'
+import { useOptimizationState } from '@/composables/useOptimizationState'
+import type { OptimizationItem } from '@/types'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
-const store = useStore()
+import { electron } from '@/electron'
 
-const total = computed(() => {
-  const percentage = Number(
-    Math.abs(
-      store.totalFiles.compressedSize * (100 / store.totalFiles.originalSize) -
-        100
-    ).toFixed(2)
-  )
-
-  return {
-    originalSize: formatBytes(store.totalFiles.originalSize),
-    compressedSize: formatBytes(store.totalFiles.compressedSize),
-    compressionPercentage: isNaN(percentage) ? 0 : percentage
-  }
-})
-
-ipc.on('file-complete', (_, file: FileOutput) => {
-  store.files.push(file)
-  store.totalFiles.originalSize += file.originalSize.bytes
-  store.totalFiles.compressedSize += file.compressedSize.bytes
-})
-
-ipc.on('optimization-start', () => {
-  if (electronStore.get('clearResultList')) {
-    store.files = []
-  }
-  store.jobTime = '-'
-})
-
-ipc.on('job-time', (_, time) => {
-  store.jobTime = time
-})
-
-onUnmounted(() => {
-  ipc.removeListeners('file-complete')
-  ipc.removeListeners('optimization-start')
-  ipc.removeListeners('job-time')
-})
+const { state, selectFile, removeFile } = useOptimizationState()
+const openContextMenu = async (path: string) => {
+  selectFile(path)
+  const action = await electron.showFileContextMenu(!state.isOptimizing)
+  if (action === 'remove') removeFile(path)
+}
+const statusLabel = (status: OptimizationItem['status']) =>
+  ({
+    pending: 'Pending',
+    running: 'Optimizing',
+    completed: 'Done',
+    failed: 'Failed'
+  })[status]
 </script>
 
 <style lang="scss" scoped>
-.list {
-  position: relative;
-  font-size: 10px;
+.file-list {
+  min-height: 0;
   overflow: hidden;
-  &__header {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    &-item {
-      display: flex;
-      flex-flow: column;
-      text-align: center;
-      h2 {
-        margin-top: 0;
-      }
-    }
-  }
-
-  &__body {
-    overflow-y: auto;
-    height: calc(100vh - var(--footer-height) - 75px);
-  }
-  table {
-    text-align: left;
-    width: 100%;
-    position: relative;
-    border-collapse: collapse;
-    th {
-      background-color: var(--color-bg);
-      position: sticky;
-      top: 0;
-    }
-    tr {
-      &.event {
-        background: var(--color-table-row-even);
-      }
-    }
+  display: grid;
+  grid-template-rows: 36px minmax(0, 1fr);
+}
+.file-grid {
+  align-items: center;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(180px, 1fr) 82px 88px 64px 76px;
+  padding: 0 24px;
+}
+.file-list__header {
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.file-list__header span:not(:first-child),
+.file-row > span:not(:first-child) {
+  text-align: right;
+}
+.file-list__body {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.file-list__rows {
+  min-width: 100%;
+}
+.file-row {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: var(--color-text);
+  height: 62px;
+  width: 100%;
+}
+.file-row:hover {
+  background: var(--color-surface);
+}
+.file-row.selected {
+  background: var(--color-selection);
+}
+.file-row > span {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.file-name {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+  text-align: left !important;
+}
+.file-name > span:last-child {
+  font-weight: 550;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.optimized {
+  color: var(--color-primary);
+}
+em {
+  background: var(--color-surface-raised);
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 650;
+  padding: 4px 9px;
+}
+em.completed {
+  background: var(--color-accent-soft);
+  color: var(--color-primary);
+}
+em.failed {
+  background: rgb(255 69 58 / 14%);
+  color: #ff6961;
+}
+.file-list__empty {
+  align-items: center;
+  color: var(--color-text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+}
+.file-list__empty strong {
+  color: var(--color-text);
+}
+.spinner {
+  animation: spin 0.8s linear infinite;
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  border-top-color: var(--color-primary);
+  height: 20px;
+  width: 20px;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>
