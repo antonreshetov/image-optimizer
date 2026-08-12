@@ -1,6 +1,6 @@
 {
   "name": "image-optimizer",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "A tool for optimizing images and vector graphics",
   "main": "build/main/index.js",
   "packageManager": "pnpm@10.29.2",
