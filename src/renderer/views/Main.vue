@@ -95,7 +95,6 @@
                 <Trash2 />
               </Button>
             </div>
-            <AppFooter />
             <span v-if="completedCount" class="action-summary">
               {{ completedCount }}
               {{ completedCount === 1 ? 'image' : 'images' }} optimized

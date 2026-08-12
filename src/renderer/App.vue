@@ -16,6 +16,10 @@
     >
       <PanelRight />
     </Button>
+    <AppFooter
+      class="update-control-position"
+      :class="{ 'update-control-position--with-inspector': route.path === '/' }"
+    />
   </div>
   <main>
     <RouterView />
@@ -173,6 +177,17 @@ main {
     right: 12px;
     top: 7px;
     width: 30px;
+  }
+
+  .update-control-position {
+    pointer-events: auto;
+    position: absolute;
+    right: 12px;
+    top: 7px;
+
+    &--with-inspector {
+      right: 48px;
+    }
   }
 }
 
