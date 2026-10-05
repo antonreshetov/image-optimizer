@@ -13,5 +13,5 @@
     "skipLibCheck": true
   },
   "include": ["src/main/**/*.ts", "src/main/**/*.d.ts", "src/shared/**/*.ts"],
-  "exclude": ["node_modules", "src/**/*.test.ts"]
+  "exclude": ["node_modules", "src/**/*.test.ts", "src/**/*.integration.ts"]
 }

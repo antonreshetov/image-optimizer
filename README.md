@@ -58,7 +58,7 @@ Download the latest installer from [GitHub Releases](https://github.com/antonres
 
 - Node.js 24
 - pnpm 10
-- macOS: Xcode Command Line Tools (`xcode-select --install`) to build the bundled JPEG compressor for Apple Silicon and Intel. This runs automatically before development and production builds and is reused until dependencies are reinstalled.
+- macOS: Xcode Command Line Tools (`xcode-select --install`) and CMake to build universal JPEG and WebP compressors. Preparation runs automatically before development and production builds and is reused until dependencies are reinstalled. The first WebP build downloads pinned WebP and libpng sources and verifies their SHA-256 checksums; installed apps need neither build tools nor network access for optimization.
 
 Install dependencies and start the Electron app with hot reload:
 
@@ -78,6 +78,10 @@ pnpm build
 ```
 
 `pnpm check` runs ESLint, TypeScript checks, and the Vitest test suite.
+
+`pnpm prepare:compressors && pnpm test:compressors` tests real JPEG, PNG, GIF,
+and SVG optimization and JPEG/PNG conversion to WebP. CI runs these checks on
+both Apple Silicon and Intel Macs; macOS releases also run them before packaging.
 
 ### Packaging
 
