@@ -58,6 +58,7 @@ Download the latest installer from [GitHub Releases](https://github.com/antonres
 
 - Node.js 24
 - pnpm 10
+- macOS: Xcode Command Line Tools (`xcode-select --install`) to build the bundled JPEG compressor for Apple Silicon and Intel. This runs automatically before development and production builds and is reused until dependencies are reinstalled.
 
 Install dependencies and start the Electron app with hot reload:
 
