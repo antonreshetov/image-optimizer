@@ -11,11 +11,11 @@
   "scripts": {
     "dev": "concurrently --kill-others --names renderer,main,electron \"pnpm dev:renderer\" \"pnpm dev:main\" \"pnpm dev:electron\"",
     "dev:renderer": "vite --host 127.0.0.1 --port 3000 --strictPort",
-    "dev:main": "pnpm prepare:jpeg && tsc -p tsconfig.main.json --watch --preserveWatchOutput",
+    "dev:main": "pnpm prepare:compressors && tsc -p tsconfig.main.json --watch --preserveWatchOutput",
     "dev:electron": "wait-on tcp:127.0.0.1:3000 build/main/index.js && electronmon .",
     "clean": "rimraf build/main build/renderer build/shared",
     "build": "pnpm clean && pnpm build:main && pnpm build:renderer",
-    "build:main": "pnpm prepare:jpeg && tsc -p tsconfig.main.json",
+    "build:main": "pnpm prepare:compressors && tsc -p tsconfig.main.json",
     "prepare:jpeg": "node scripts/prepare-macos-jpeg.mjs",
     "build:renderer": "vite build",
     "package": "pnpm build && electron-builder --dir",
@@ -35,7 +35,9 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test",
     "release": "bumpp -c 'build: release v' -t",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "prepare:compressors": "pnpm prepare:jpeg && node scripts/prepare-macos-webp.mjs",
+    "test:compressors": "vitest run --config vitest.compressors.config.mts"
   },
   "repository": "https://github.com/antonreshetov/image-optimizer",
   "author": {
