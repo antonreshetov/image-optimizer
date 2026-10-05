@@ -131,19 +131,7 @@ export const createMenu = (
           {
             label: 'PayPal',
             click() {
-              shell.openExternal('https://paypal.me/antonreshetov')
-            }
-          },
-          {
-            label: 'Patreon',
-            click() {
-              shell.openExternal('https://patreon.com/antonreshetov')
-            }
-          },
-          {
-            label: 'Ko-Fi',
-            click() {
-              shell.openExternal('https://ko-fi.com/antonreshetov')
+              shell.openExternal('https://paypal.me/antongithub')
             }
           }
         ]
