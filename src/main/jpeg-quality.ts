@@ -1,0 +1,1 @@
+export const DEFAULT_JPEG_QUALITY = 75

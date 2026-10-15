@@ -8,7 +8,7 @@ import {
 describe('PNG quality', () => {
   it('uses the current default for a new installation', () => {
     expect(resolvePngQuality(undefined, undefined)).toBe(DEFAULT_PNG_QUALITY)
-    expect(DEFAULT_PNG_QUALITY).toBe(75)
+    expect(DEFAULT_PNG_QUALITY).toBe(85)
   })
 
   it('migrates the previous maximum when the new setting is absent', () => {
