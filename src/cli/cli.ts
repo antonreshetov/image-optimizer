@@ -18,6 +18,12 @@ import {
   isSafeOutputDirectoryName
 } from '../main/utils'
 import type { FileFailure, FileOutput, OptimizationInput } from '../shared/ipc'
+import {
+  DEFAULT_CONCURRENCY,
+  DEFAULT_OUTPUT_DIRECTORY,
+  runWizard,
+  type CliCommand
+} from './wizard'
 
 export const EXIT_OK = 0
 export const EXIT_FAILED_FILES = 1
@@ -33,13 +39,6 @@ export interface CliIo {
   // Prompts and the progress bar would hang or garble output in pipes and CI,
   // so they are used only when a person is at the terminal.
   interactive: boolean
-}
-
-export interface CliCommand {
-  paths: string[]
-  options: OptimizerOptions
-  json: boolean
-  yes: boolean
 }
 
 export type ParsedCli =
@@ -79,10 +78,13 @@ const createProgram = (io: Pick<CliIo, 'stdout' | 'stderr'>) =>
       'Optimize JPEG, PNG, GIF and SVG files. Folders are processed recursively.'
     )
     .version(version, '-v, --version')
-    .argument('<paths...>', 'files or folders to optimize')
+    .argument(
+      '[paths...]',
+      'files or folders to optimize; omit to answer questions instead'
+    )
     .addOption(
       new Option('-o, --output-dir <name>', 'subfolder for optimized files')
-        .default('minified')
+        .default(DEFAULT_OUTPUT_DIRECTORY)
         .argParser(outputDirectoryName)
     )
     .addOption(
@@ -106,7 +108,7 @@ const createProgram = (io: Pick<CliIo, 'stdout' | 'stderr'>) =>
     )
     .addOption(
       new Option('-c, --concurrency <1-64>', 'files processed in parallel')
-        .default(10)
+        .default(DEFAULT_CONCURRENCY)
         .argParser(integerInRange(1, 64))
     )
     .option('--json', 'print the results as JSON')
@@ -198,9 +200,29 @@ export const runCli = async (argv: string[], io: CliIo) => {
   const parsed = parseCliArgs(argv, io)
   if (parsed.kind === 'exit') return parsed.code
 
-  const { options, json, yes } = parsed.command
-  const interactive = io.interactive && !json
-  const paths = parsed.command.paths.map((p) => path.resolve(io.cwd, p))
+  let command = parsed.command
+  const interactive = io.interactive && !command.json
+
+  if (!command.paths.length) {
+    if (!interactive) {
+      io.stderr(
+        "error: missing required argument 'paths'\n(run image-optimizer --help for usage)\n"
+      )
+      return EXIT_USAGE
+    }
+    prompts.intro('image-optimizer')
+    const answered = await runWizard(command, io.cwd)
+    if (!answered) {
+      prompts.cancel('Nothing was changed.')
+      return EXIT_CANCELLED
+    }
+    command = answered
+  } else if (interactive) {
+    prompts.intro('image-optimizer')
+  }
+
+  const { options, json, yes } = command
+  const paths = command.paths.map((p) => path.resolve(io.cwd, p))
   const missing = paths.filter((p) => !existsSync(p))
   if (missing.length) {
     for (const p of missing) io.stderr(`image-optimizer: not found: ${p}\n`)
@@ -213,8 +235,6 @@ export const runCli = async (argv: string[], io: CliIo) => {
     options.outputDirectoryName,
     options.addToSubfolder
   )
-
-  if (interactive) prompts.intro('image-optimizer')
 
   const overwritten = countOverwrittenOriginals(inputs, options)
   if (overwritten && !yes) {

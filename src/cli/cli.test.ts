@@ -85,7 +85,6 @@ describe('parseCliArgs', () => {
   })
 
   it.each([
-    [[]],
     [['--png-quality', '101', 'a.png']],
     [['--jpeg-quality', '7.5', 'a.jpg']],
     [['--concurrency', '0', 'a.jpg']],
@@ -139,6 +138,14 @@ describe('runCli', () => {
   })
   afterEach(() => {
     rmSync(directory, { recursive: true, force: true })
+  })
+
+  it('requires paths when it cannot ask questions', async () => {
+    expect(await runCli([], io())).toBe(EXIT_USAGE)
+    expect(stderr).toContain("missing required argument 'paths'")
+    expect(await runCli(['--json'], { ...io(), interactive: true })).toBe(
+      EXIT_USAGE
+    )
   })
 
   it('returns a usage error for missing paths', async () => {
