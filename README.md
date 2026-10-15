@@ -57,7 +57,7 @@ Download the latest installer from [GitHub Releases](https://github.com/antonres
 The app ships an `image-optimizer` command that uses the same bundled optimizers.
 
 - macOS: choose **Image Optimizer → Install Command Line Tool…** to link it into `/usr/local/bin`.
-- Windows: the command is `resources\bin\image-optimizer.cmd` in the install directory.
+- Windows: the installer adds `resources\bin` from the install directory to your user `PATH`; open a new terminal after installing. Uninstalling removes it.
 
 ```sh
 image-optimizer ./images                 # writes to ./images/minified

@@ -57,7 +57,8 @@
     "oneClick": false,
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
-    "shortcutName": "Image Optimizer"
+    "shortcutName": "Image Optimizer",
+    "include": "build/installer.nsh"
   },
   "linux": {
     "target": ["snap"],
