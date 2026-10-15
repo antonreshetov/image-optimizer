@@ -18,6 +18,7 @@
     "build/main/**/*",
     "build/renderer/**/*",
     "build/shared/**/*",
+    "build/cli/**/*",
     "build/icons/**/*",
     "package.json",
     "!**/*.map"
@@ -37,11 +38,20 @@
     "hardenedRuntime": true,
     "entitlements": "build/entitlements.mac.plist",
     "entitlementsInherit": "build/entitlements.mac.plist",
-    "notarize": true
+    "notarize": true,
+    "extraResources": [
+      { "from": "resources/cli/image-optimizer", "to": "bin/image-optimizer" }
+    ]
   },
   "win": {
     "target": "nsis",
-    "icon": "build/icons/icon.ico"
+    "icon": "build/icons/icon.ico",
+    "extraResources": [
+      {
+        "from": "resources/cli/image-optimizer.cmd",
+        "to": "bin/image-optimizer.cmd"
+      }
+    ]
   },
   "nsis": {
     "oneClick": false,

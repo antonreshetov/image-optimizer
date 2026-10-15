@@ -52,6 +52,25 @@ Download the latest installer from [GitHub Releases](https://github.com/antonres
 - Windows: NSIS installer
 - Linux: Snap package
 
+## Command line
+
+The app ships an `image-optimizer` command that uses the same bundled optimizers.
+
+- macOS: choose **Image Optimizer → Install Command Line Tool…** to link it into `/usr/local/bin`.
+- Windows: the command is `resources\bin\image-optimizer.cmd` in the install directory.
+
+```sh
+image-optimizer ./images                 # writes to ./images/minified
+image-optimizer photo.jpg --webp -s      # writes minified/photo.min.webp
+image-optimizer ./assets --in-place -s   # logo.min.png next to logo.png
+image-optimizer ./images --json          # machine-readable report
+image-optimizer ./assets --in-place -y   # overwrite originals without asking
+```
+
+In a terminal it shows a progress bar and asks before overwriting originals. In scripts and CI, overwriting requires `--yes`.
+
+Run `image-optimizer --help` for all options. The exit code is `1` when any file fails, `2` on invalid arguments and `130` when you decline to overwrite.
+
 ## Development
 
 ### Requirements
