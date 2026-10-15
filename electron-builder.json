@@ -18,6 +18,7 @@
     "build/main/**/*",
     "build/renderer/**/*",
     "build/shared/**/*",
+    "build/cli/**/*",
     "build/icons/**/*",
     "package.json",
     "!**/*.map"
@@ -37,17 +38,25 @@
     "hardenedRuntime": true,
     "entitlements": "build/entitlements.mac.plist",
     "entitlementsInherit": "build/entitlements.mac.plist",
-    "notarize": true
+    "notarize": true,
+    "extraResources": [{ "from": "resources/cli/imgopt", "to": "bin/imgopt" }]
   },
   "win": {
     "target": "nsis",
-    "icon": "build/icons/icon.ico"
+    "icon": "build/icons/icon.ico",
+    "extraResources": [
+      {
+        "from": "resources/cli/imgopt.cmd",
+        "to": "bin/imgopt.cmd"
+      }
+    ]
   },
   "nsis": {
     "oneClick": false,
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
-    "shortcutName": "Image Optimizer"
+    "shortcutName": "Image Optimizer",
+    "include": "build/installer.nsh"
   },
   "linux": {
     "target": ["snap"],

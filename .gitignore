@@ -3,6 +3,7 @@ dist
 build/*
 !build/icons
 !build/entitlements.mac.plist
+!build/installer.nsh
 src/renderer/types/components.d.ts
 coverage
 .eslintcache

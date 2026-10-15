@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Runs the bundled CLI with the app's own Electron binary in Node mode.
+# Installed into PATH as a symlink, so resolve it back into the app bundle.
+SCRIPT="$0"
+while [ -L "$SCRIPT" ]; do
+  TARGET="$(readlink "$SCRIPT")"
+  case "$TARGET" in
+    /*) SCRIPT="$TARGET" ;;
+    *) SCRIPT="$(dirname "$SCRIPT")/$TARGET" ;;
+  esac
+done
+
+RESOURCES="$(cd "$(dirname "$SCRIPT")/.." && pwd)"
+ELECTRON="$RESOURCES/../MacOS/Image Optimizer"
+
+ELECTRON_RUN_AS_NODE=1 exec "$ELECTRON" "$RESOURCES/app.asar/build/cli/index.js" "$@"

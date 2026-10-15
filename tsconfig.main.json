@@ -12,6 +12,11 @@
     "rootDir": "src",
     "skipLibCheck": true
   },
-  "include": ["src/main/**/*.ts", "src/main/**/*.d.ts", "src/shared/**/*.ts"],
+  "include": [
+    "src/main/**/*.ts",
+    "src/main/**/*.d.ts",
+    "src/shared/**/*.ts",
+    "src/cli/**/*.ts"
+  ],
   "exclude": ["node_modules", "src/**/*.test.ts", "src/**/*.integration.ts"]
 }

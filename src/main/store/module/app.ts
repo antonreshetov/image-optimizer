@@ -1,5 +1,6 @@
 import Store from 'electron-store'
 import type { StoreSchema } from '../../types'
+import { DEFAULT_JPEG_QUALITY } from '../../jpeg-quality'
 import { DEFAULT_PNG_QUALITY, resolvePngQuality } from '../../png-quality'
 
 interface LegacyStoreSchema {
@@ -42,7 +43,7 @@ const appStore = new Store<StoreSchema>({
       properties: {
         quality: {
           type: 'number',
-          default: 75
+          default: DEFAULT_JPEG_QUALITY
         }
       },
       default: {}

@@ -5,6 +5,7 @@ import os from 'os'
 import { getFilesOrDirs } from './utils'
 import { IPC_CHANNELS } from '../shared/ipc'
 import { checkForUpdates } from './updater'
+import { installCommandLineTool } from './cli-install'
 
 const isMac = process.platform === 'darwin'
 const year = new Date().getFullYear()
@@ -41,6 +42,15 @@ const createSubmenu = (
         label: 'Toggle Inspector',
         click() {
           context.webContents.send(IPC_CHANNELS.menuToggleInspector)
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Install Command Line Tool…',
+        click() {
+          void installCommandLineTool()
         }
       },
       {

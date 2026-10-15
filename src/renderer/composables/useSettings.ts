@@ -4,7 +4,7 @@ import type { AppSettings, SettingUpdate } from '../../shared/ipc'
 
 const settings = reactive<AppSettings>({
   mozjpeg: { quality: 75 },
-  pngQuality: 75,
+  pngQuality: 85,
   convertToWebp: false,
   addMinSuffix: false,
   addToSubfolder: true,

@@ -1,4 +1,4 @@
-export const DEFAULT_PNG_QUALITY = 75
+export const DEFAULT_PNG_QUALITY = 85
 
 const isPngQuality = (value: unknown): value is number =>
   typeof value === 'number' &&
