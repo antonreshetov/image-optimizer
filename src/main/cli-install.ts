@@ -3,7 +3,7 @@ import { execFile } from 'node:child_process'
 import { lstat, mkdir, readlink, symlink, unlink } from 'node:fs/promises'
 import path from 'node:path'
 
-const COMMAND_NAME = 'image-optimizer'
+const COMMAND_NAME = 'imgopt'
 const LINK_DIRECTORY = '/usr/local/bin'
 const LINK_PATH = path.join(LINK_DIRECTORY, COMMAND_NAME)
 

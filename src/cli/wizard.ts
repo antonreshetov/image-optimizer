@@ -75,7 +75,7 @@ export const formatCommandLine = (command: CliCommand) => {
   if (command.json) args.push('--json')
   if (command.yes) args.push('--yes')
 
-  return ['image-optimizer', ...args.map(quoteArg)].join(' ')
+  return ['imgopt', ...args.map(quoteArg)].join(' ')
 }
 
 class WizardCancelled extends Error {}

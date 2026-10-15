@@ -73,7 +73,7 @@ const outputDirectoryName = (value: string) => {
 }
 
 const createProgram = (io: Pick<CliIo, 'stdout' | 'stderr'>) =>
-  new Command('image-optimizer')
+  new Command('imgopt')
     .description(
       'Optimize JPEG, PNG, GIF and SVG files. Folders are processed recursively.'
     )
@@ -113,7 +113,7 @@ const createProgram = (io: Pick<CliIo, 'stdout' | 'stderr'>) =>
     )
     .option('--json', 'print the results as JSON')
     .option('-y, --yes', 'overwrite originals without asking')
-    .showHelpAfterError('(run image-optimizer --help for usage)')
+    .showHelpAfterError('(run imgopt --help for usage)')
     .configureOutput({ writeOut: io.stdout, writeErr: io.stderr })
     .exitOverride()
 
@@ -206,11 +206,11 @@ export const runCli = async (argv: string[], io: CliIo) => {
   if (!command.paths.length) {
     if (!interactive) {
       io.stderr(
-        "error: missing required argument 'paths'\n(run image-optimizer --help for usage)\n"
+        "error: missing required argument 'paths'\n(run imgopt --help for usage)\n"
       )
       return EXIT_USAGE
     }
-    prompts.intro('image-optimizer')
+    prompts.intro('imgopt')
     const answered = await runWizard(command, io.cwd)
     if (!answered) {
       prompts.cancel('Nothing was changed.')
@@ -218,14 +218,14 @@ export const runCli = async (argv: string[], io: CliIo) => {
     }
     command = answered
   } else if (interactive) {
-    prompts.intro('image-optimizer')
+    prompts.intro('imgopt')
   }
 
   const { options, json, yes } = command
   const paths = command.paths.map((p) => path.resolve(io.cwd, p))
   const missing = paths.filter((p) => !existsSync(p))
   if (missing.length) {
-    for (const p of missing) io.stderr(`image-optimizer: not found: ${p}\n`)
+    for (const p of missing) io.stderr(`imgopt: not found: ${p}\n`)
     return EXIT_USAGE
   }
 
@@ -240,7 +240,7 @@ export const runCli = async (argv: string[], io: CliIo) => {
   if (overwritten && !yes) {
     if (!interactive) {
       io.stderr(
-        `image-optimizer: this would overwrite ${overwritten} original file(s); pass --yes to confirm\n`
+        `imgopt: this would overwrite ${overwritten} original file(s); pass --yes to confirm\n`
       )
       return EXIT_USAGE
     }

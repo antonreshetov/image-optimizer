@@ -39,17 +39,15 @@
     "entitlements": "build/entitlements.mac.plist",
     "entitlementsInherit": "build/entitlements.mac.plist",
     "notarize": true,
-    "extraResources": [
-      { "from": "resources/cli/image-optimizer", "to": "bin/image-optimizer" }
-    ]
+    "extraResources": [{ "from": "resources/cli/imgopt", "to": "bin/imgopt" }]
   },
   "win": {
     "target": "nsis",
     "icon": "build/icons/icon.ico",
     "extraResources": [
       {
-        "from": "resources/cli/image-optimizer.cmd",
-        "to": "bin/image-optimizer.cmd"
+        "from": "resources/cli/imgopt.cmd",
+        "to": "bin/imgopt.cmd"
       }
     ]
   },

@@ -54,23 +54,23 @@ Download the latest installer from [GitHub Releases](https://github.com/antonres
 
 ## Command line
 
-The app ships an `image-optimizer` command that uses the same bundled optimizers.
+The app ships an `imgopt` command that uses the same bundled optimizers.
 
 - macOS: choose **Image Optimizer → Install Command Line Tool…** to link it into `/usr/local/bin`.
 - Windows: the installer adds `resources\bin` from the install directory to your user `PATH`; open a new terminal after installing. Uninstalling removes it.
 
 ```sh
-image-optimizer                          # asks what to optimize and how
-image-optimizer ./images                 # writes to ./images/minified
-image-optimizer photo.jpg --webp -s      # writes minified/photo.min.webp
-image-optimizer ./assets --in-place -s   # logo.min.png next to logo.png
-image-optimizer ./images --json          # machine-readable report
-image-optimizer ./assets --in-place -y   # overwrite originals without asking
+imgopt                          # asks what to optimize and how
+imgopt ./images                 # writes to ./images/minified
+imgopt photo.jpg --webp -s      # writes minified/photo.min.webp
+imgopt ./assets --in-place -s   # logo.min.png next to logo.png
+imgopt ./images --json          # machine-readable report
+imgopt ./assets --in-place -y   # overwrite originals without asking
 ```
 
 Without paths it walks you through the options and prints the equivalent command at the end. In a terminal it shows a progress bar and asks before overwriting originals. In scripts and CI, paths are required and overwriting requires `--yes`.
 
-Run `image-optimizer --help` for all options. The exit code is `1` when any file fails, `2` on invalid arguments and `130` when you decline to overwrite.
+Run `imgopt --help` for all options. The exit code is `1` when any file fails, `2` on invalid arguments and `130` when you decline to overwrite.
 
 ## Development
 

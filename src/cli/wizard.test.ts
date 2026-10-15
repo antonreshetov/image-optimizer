@@ -69,7 +69,7 @@ describe('answersToCommand', () => {
 describe('formatCommandLine', () => {
   it('omits defaults', () => {
     expect(formatCommandLine(answersToCommand(answers(), base()))).toBe(
-      'image-optimizer images'
+      'imgopt images'
     )
   })
 
